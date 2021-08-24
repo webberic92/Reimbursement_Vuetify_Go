@@ -1,6 +1,6 @@
 <template>
   <v-container class="grey lighten-5" fill-height fluid
-    >>
+    >
     <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
       <v-row>
         <v-col cols="12" sm="4"> </v-col>
@@ -180,19 +180,13 @@ export default {
       console.log(JSON.stringify(this.form));
       axios({
         method: "post",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         url: "http://localhost:8000/api/register",
         data: this.form,
       }).then(function(response) {
-        console.log(response.data);
+        console.log(response);
       });
     },
-    // submit() {
-    //   this.$refs.observer.validate();
-    //   console.log("submit button hit");
-    //   console.log(JSON.stringify(this.form));
-    // },
-    clear() {
+     clear() {
       this.firstName = "";
       this.lastName = "";
       this.phoneNumber = "";
