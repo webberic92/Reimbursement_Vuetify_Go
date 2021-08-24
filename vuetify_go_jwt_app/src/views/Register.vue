@@ -1,11 +1,13 @@
 <template>
+
   <v-container class="grey lighten-5" fill-height fluid
     >
     <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
       <v-row>
         <v-col cols="12" sm="4"> </v-col>
       </v-row>
-
+<p>TODO: ADD PASSWORD LOGIC
+</p>
       <validation-observer ref="observer" v-slot="{ invalid }">
         <form @submit.prevent="submit">
           <!-- First Name   -->
@@ -90,18 +92,18 @@
             ></v-select>
           </validation-provider>
 
-          <!-- Check Box -->
+          <!-- SOU -->
           <validation-provider
             v-slot="{ errors }"
             rules="required"
-            name="checkbox"
-          >
+            name="Statement of Understanding"
+          >Statement of Understanding
             <v-checkbox
-              v-model="form.checkbox"
+              v-model="form.sou"
               :error-messages="errors"
               value="true"
               label="By Checking this box you are agreeing to not use this app nefariously or out of context."
-              type="checkbox"
+              type="sou"
               required
             ></v-checkbox>
           </validation-provider>
@@ -168,7 +170,7 @@ export default {
         phoneNumber: "",
         email: "",
         userType: null,
-        checkbox: null,
+        sou: null,
       },
       typeOfUser: ["Regular User", "Administrator User"],
     };
@@ -176,6 +178,12 @@ export default {
   methods: {
     submit() {
       this.$refs.observer.validate();
+      if (this.form.userType == "Regular User"){
+        this.form.userType = "R"
+      } 
+      if (this.form.userType == "Administrator User"){
+        this.form.userType = "A"
+      } 
       console.log("submit button hit");
       console.log(JSON.stringify(this.form));
       axios({
@@ -192,7 +200,7 @@ export default {
       this.phoneNumber = "";
       this.email = "";
       this.userType = null;
-      this.checkbox = null;
+      this.sou = null;
       this.$refs.observer.reset();
     },
   },
