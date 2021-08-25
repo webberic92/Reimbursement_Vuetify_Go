@@ -32,11 +32,19 @@ func Register(c *fiber.Ctx) error {
 		Password:    password,
 	}
 
-	if data["name"] == "" {
+	if data["firstName"] == "" {
 		c.Status(fiber.StatusBadRequest)
 
 		return c.JSON(fiber.Map{
-			"message": "No name provided.",
+			"message": "No first name provided.",
+		})
+	}
+
+	if data["lastName"] == "" {
+		c.Status(fiber.StatusBadRequest)
+
+		return c.JSON(fiber.Map{
+			"message": "No last name provided.",
 		})
 	}
 
@@ -47,11 +55,34 @@ func Register(c *fiber.Ctx) error {
 			"message": "No email provided",
 		})
 	}
+	if data["phoneNumber"] == "" {
+		c.Status(fiber.StatusBadRequest)
+
+		return c.JSON(fiber.Map{
+			"message": "No phone number provided",
+		})
+	}
 	if data["password"] == "" {
 		c.Status(fiber.StatusBadRequest)
 
 		return c.JSON(fiber.Map{
 			"message": "No password provided.",
+		})
+	}
+
+	if data["userType"] == "" {
+		c.Status(fiber.StatusBadRequest)
+
+		return c.JSON(fiber.Map{
+			"message": "No user type provided.",
+		})
+	}
+
+	if data["sou"] == "" {
+		c.Status(fiber.StatusBadRequest)
+
+		return c.JSON(fiber.Map{
+			"message": "No statement of understanding provided.",
 		})
 	}
 
