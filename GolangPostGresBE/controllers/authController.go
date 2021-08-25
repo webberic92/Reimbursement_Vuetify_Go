@@ -21,14 +21,23 @@ func Register(c *fiber.Ctx) error {
 		return err
 	}
 
+	sou, err := strconv.ParseBool(data["sou"])
+
+	if err != nil {
+		c.Status(fiber.StatusBadRequest)
+
+		return c.JSON(fiber.Map{
+			"message": "Cant parse boolean for sou",
+		})
+	}
 	password, _ := bcrypt.GenerateFromPassword([]byte(data["password"]), 14)
 	user := models.User{
 		FirstName:   data["firstName"],
 		LastName:    data["lastName"],
 		Email:       data["email"],
 		PhoneNumber: data["phoneNumber"],
-		UserType:    data["userTpe"],
-		Sou:         data["sou"],
+		UserType:    data["userType"],
+		Sou:         sou,
 		Password:    password,
 	}
 

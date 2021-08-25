@@ -7,6 +7,6 @@ type User struct {
 	PhoneNumber string `json:"phoneNumber"`
 	Email       string `json:"email" gorm:"unique"`
 	UserType    string `json:"userType"`
-	Sou         string `json:"sou"`
+	Sou         bool   `json:"sou"`
 	Password    []byte `json:"-"`
 }
