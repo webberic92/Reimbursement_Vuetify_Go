@@ -1,7 +1,11 @@
 <template>
   <p align="center">
     <strong>
-      Logged in VUE
+      Welcome {{ this.firstName }}
+      <br />
+      <br />
+      You are currently logged in as a
+      {{ this.userType }} user<br />
     </strong>
     <br />
     <strong>
@@ -12,42 +16,45 @@
       Differentiate between Admin users or Regular users.
     </strong>
     <br />
-    <v-btn text  @click="getUser">Get Current User</v-btn>
   </p>
 </template>
 
 <script>
-
 import Axios from "axios";
 
-
-
 export default {
-
-  methods: {
-    getUser() {
+       created() {  
       console.log("get user button hit");
-      const token = JSON.parse(sessionStorage.getItem('jwt'));
-      console.log(token)
-Axios.get('http://localhost:8000/api/user',
- {
+      Axios.get("http://localhost:8000/api/user", {
         withCredentials: true,
-        headers: {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'
-    }}).then(async (response) => {
-
-
-
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Content-Type": "application/json",
+        },
+      })
+        .then(async (response) => {
           if (!response.ok) {
-             
+            this.firstName = response.data.firstName;
 
-            console.log(response.data.message);
+            if (response.data.userType == "R") {
+              this.userType = "Regular";
+            }
+
+            console.log(response.data);
           }
         })
         .catch((error) => {
           console.log(error.response);
-
+           this.$router.push("/");
         });
-    },
+  },
+  data() {
+    return {
+      firstName: "",
+      userType: "",
+    };
+  },
+  methods: {
   },
 };
 </script>

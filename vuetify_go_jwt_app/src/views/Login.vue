@@ -1,7 +1,6 @@
 <template>
   <v-container class="grey lighten-5" fill-height fluid>
     <v-card class="pa-md-4 mx-lg-auto" color="white" width="600px">
-     
       <!-- Messages -->
       <p v-if="errorMessage" align="center" style="color:red">
         <strong>
@@ -21,8 +20,6 @@
 
       <validation-observer ref="observer" v-slot="{ invalid }">
         <form @submit.prevent="submit">
-
-
           <!-- Email -->
 
           <validation-provider
@@ -54,7 +51,6 @@
             ></v-text-field>
           </validation-provider>
 
-       
           <v-btn class="mr-4" type="submit" :disabled="invalid">
             submit
           </v-btn>
@@ -89,7 +85,6 @@ extend("email", {
   message: "Email must be valid",
 });
 
-
 export default {
   components: {
     ValidationProvider,
@@ -113,9 +108,10 @@ export default {
       this.$refs.observer.validate();
       console.log("submit button hit");
       console.log(JSON.stringify(this.form));
-axios.post('http://localhost:8000/api/login', this.form, {
-withCredentials: true
-})
+      axios
+        .post("http://localhost:8000/api/login", this.form, {
+          withCredentials: true,
+        })
         .then(async (response) => {
           if (!response.ok) {
             console.log(response.data.message);
@@ -131,7 +127,6 @@ withCredentials: true
           console.log(error.response);
           this.errorMessage = error.response;
           this.successMessage - "";
-
         });
     },
     clear() {

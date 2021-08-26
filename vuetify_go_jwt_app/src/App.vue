@@ -22,11 +22,10 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn text  to="register">Register</v-btn>
-      <v-btn text  to="login">Login</v-btn>
-      <v-btn text  to="home">LoggedInUser</v-btn>
+      <v-btn text to="register">Register</v-btn>
+      <v-btn text to="login">Login</v-btn>
 
-      <v-btn text  @click="logout">Logout</v-btn>
+      <v-btn text @click="logout">Logout</v-btn>
     </v-app-bar>
 
     <v-main>
@@ -40,29 +39,23 @@ import axios from "axios";
 
 export default {
   name: "App",
-   methods: {
+  methods: {
     logout() {
-      axios({
-        method: "post",
-        url: "http://localhost:8000/api/logout",
-        headers: {'Content-Type': 'application/json'},
-        credentials: 'include'
+  axios("http://localhost:8000/api/logout", {
+  method: "post",
+  withCredentials: true
+
       })
         .then(async (response) => {
           if (!response.ok) {
-            console.log(response.data.message);
-
+            console.log(response.data);
+            this.$router.push("/")
           }
         })
         .catch((error) => {
-          console.log(error.response.data.message);
-
-
+          console.log(error.response);
         });
-    },
-
-  data: () => ({
-    //
-  }),
-   }}
+  }
+  },
+};
 </script>
