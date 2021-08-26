@@ -77,6 +77,7 @@ import {
 } from "vee-validate";
 import axios from "axios";
 
+
 setInteractionMode("eager");
 
 extend("required", {
@@ -116,10 +117,15 @@ export default {
       axios({
         method: "post",
         url: "http://localhost:8000/api/login",
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include',
         data: this.form,
       })
         .then(async (response) => {
           if (!response.ok) {
+           console.log(response);
+
+           console.log(window);
             console.log(response.data.message);
             this.errorMessage = "";
             this.successMessage = response.data.message;
