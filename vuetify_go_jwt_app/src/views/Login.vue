@@ -126,13 +126,14 @@ export default {
             this.routingMessage = "Now routing you to login page";
             setTimeout(() => {
               this.$router.push("/home");
-            }, 7000);
+            }, 3000);
           }
         })
         .catch((error) => {
-          console.log(error.response.data.message);
-          this.errorMessage = error.response.data.message;
+          console.log(error.response);
+          this.errorMessage = error.response;
           this.successMessage - "";
+
         });
     },
     clear() {
@@ -141,6 +142,7 @@ export default {
       this.$refs.observer.reset();
       this.errorMessage = "";
       this.successMessage = "";
+      this.routingMessage = "";
     },
   },
 };
