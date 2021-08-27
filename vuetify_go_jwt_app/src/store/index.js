@@ -1,37 +1,30 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from 'vue';
+import Vuex from 'vuex';
+Vue.use(Vuex);
 
 
-Vue.use(Vuex)
-
-export default new Vuex.Store({
+const store = new Vuex.Store({
   state: {
-    status: '',
-    token: localStorage.getItem('token') || '',
-    user : {}
+    isLoggedIn : false,
+    isAdmin : false
   },
   mutations: {
-    
-    auth_request(state){
-      state.status = 'loading'
+    logUserIn(state){
+      state.isLoggedIn = true
     },
-    auth_success(state, token){
-      state.status = 'success'
-      state.token = token
+    makeUserAdmin(state){
+      state.isAdmin = true
     },
-    auth_error(state){
-      state.status = 'error'
-    },
-    logout(state){
-      state.status = ''
-      state.token = ''
-    },
-  },
-  actions: {
+    logUserOut(state){
+      state.isLoggedIn = false
+      state.isAdmin = false
+    }
 
   },
-  getters : {
-    isLoggedIn: state => !!state.token,
-    authStatus: state => state.status,
+  getters: {
+    loggedIn : state =>  state.isLoggedIn,
+    admin : state => state.isAdmin
   }
-})
+});
+
+export default store;

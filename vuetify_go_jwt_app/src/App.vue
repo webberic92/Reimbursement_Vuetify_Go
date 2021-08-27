@@ -22,10 +22,11 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn text to="register">Register</v-btn>
+<div v-if="!this.$store.state.isLoggedIn">
+      <v-btn  text to="register">Register</v-btn>
       <v-btn text to="login">Login</v-btn>
-
-      <v-btn text @click="logout">Logout</v-btn>
+</div>
+      <v-btn v-if="this.$store.state.isLoggedIn" text @click="logout">Logout</v-btn>
     </v-app-bar>
 
     <v-main>
@@ -36,6 +37,7 @@
 
 <script>
 import axios from "axios";
+import store from "../src/store/index"
 
 export default {
   name: "App",
@@ -48,6 +50,8 @@ export default {
       })
         .then(async (response) => {
           if (!response.ok) {
+                        store.commit('logUserOut')
+
             console.log(response.data);
             this.$router.push("/")
           }

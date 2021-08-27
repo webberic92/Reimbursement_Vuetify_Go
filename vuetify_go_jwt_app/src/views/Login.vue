@@ -72,6 +72,7 @@ import {
   setInteractionMode,
 } from "vee-validate";
 import axios from "axios";
+import store from "..//store/index"
 
 setInteractionMode("eager");
 
@@ -118,6 +119,15 @@ export default {
             this.errorMessage = "";
             this.successMessage = response.data.message;
             this.routingMessage = "Now routing you to login page";
+          
+            
+            //VUEX STUFF
+            store.commit('logUserIn')
+            //            console.log(this.$store.state.isLoggedIn)
+            // console.log(this.$store.getters.loggedIn)
+
+            //VUEX STUFF
+
             setTimeout(() => {
               this.$router.push("/home");
             }, 3000);
