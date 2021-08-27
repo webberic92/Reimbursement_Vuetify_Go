@@ -22,11 +22,18 @@
 
       <v-spacer></v-spacer>
 
-<div v-if="!this.$store.state.isLoggedIn">
-      <v-btn  text to="register">Register</v-btn>
-      <v-btn text to="login">Login</v-btn>
-</div>
-      <v-btn v-if="this.$store.state.isLoggedIn" text @click="logout">Logout</v-btn>
+      <!-- Not logged in menu -->
+      <div v-if="!this.$store.state.isLoggedIn">
+        <v-btn text to="register">Register</v-btn>
+        <v-btn text to="login">Login</v-btn>
+      </div>
+
+      <!-- IS logged in menu -->
+      <div v-if="this.$store.state.isLoggedIn">
+
+        <v-btn text @click="logout">Logout</v-btn>
+      </div>
+
     </v-app-bar>
 
     <v-main>
@@ -37,29 +44,28 @@
 
 <script>
 import axios from "axios";
-import store from "../src/store/index"
+import store from "../src/store/index";
 
 export default {
   name: "App",
   methods: {
     logout() {
-  axios("http://localhost:8000/api/logout", {
-  method: "post",
-  withCredentials: true
-
+      axios("http://localhost:8000/api/logout", {
+        method: "post",
+        withCredentials: true,
       })
         .then(async (response) => {
           if (!response.ok) {
-                        store.commit('logUserOut')
+            store.commit("logUserOut");
 
             console.log(response.data);
-            this.$router.push("/")
+            this.$router.push("/");
           }
         })
         .catch((error) => {
           console.log(error.response);
         });
-  }
+    },
   },
 };
 </script>

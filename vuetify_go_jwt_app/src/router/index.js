@@ -3,34 +3,58 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
-import LoggedIn from '../views/LoggedIn.vue'
-import store from '../store/index.js'
+import Dashboard from '../views/Dashboard.vue'
+import store from "..//store/index";
+
 
 Vue.use(VueRouter)
+
+
+function useMustBeLoggedIn(to, from, next)
+{
+  if(store.state.isLoggedIn){
+    next(); // allow to enter route
+   } 
+   else
+   {
+    next('/'); // go to '/';
+   }
+  }
+
+function useAlreadyLoggedIn(to, from, next)
+{
+  if(!store.state.isLoggedIn){
+
+    next();
+   }
+  }
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: Home,
+    beforeEnter : useAlreadyLoggedIn,
+
   },
   {
     path: '/login',
     name: 'Login',
-    component: Login
+    component: Login,
+    beforeEnter : useAlreadyLoggedIn
   },
   {
     path: '/register',
     name: 'Register',
-    component: Register
+    component: Register,
+    beforeEnter : useAlreadyLoggedIn,
+
   },
   {
-    path: '/home',
-    name: 'LoggedIn',
-    component: LoggedIn,
-    // meta: {
-    //   requiresAuth: true
-    // }
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: Dashboard,
+    beforeEnter : useMustBeLoggedIn,
   }
 ]
 
@@ -46,7 +70,7 @@ router.beforeEach((to, from, next) => {
       next()
       return
     }
-    next('/login')
+    next('/')
   } else {
     next()
   }
