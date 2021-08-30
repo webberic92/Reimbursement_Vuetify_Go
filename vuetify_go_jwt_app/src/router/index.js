@@ -5,7 +5,7 @@ import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
 import Dashboard from '../views/Dashboard.vue'
 import store from "..//store/index";
-
+import History from "../views/History"
 
 Vue.use(VueRouter)
 
@@ -54,6 +54,12 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
+    beforeEnter : useMustBeLoggedIn,
+  },
+  {
+    path: '/history',
+    name: 'History',
+    component: History,
     beforeEnter : useMustBeLoggedIn,
   }
 ]

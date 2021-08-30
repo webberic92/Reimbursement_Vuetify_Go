@@ -30,6 +30,9 @@
 
       <!-- IS logged in menu -->
       <div v-if="this.$store.state.isLoggedIn">
+                <v-btn text to="Dashboard">Dashboard</v-btn>
+
+        <v-btn text to="History">History</v-btn>
 
         <v-btn text @click="logout">Logout</v-btn>
       </div>

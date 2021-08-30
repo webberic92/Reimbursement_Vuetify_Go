@@ -1,111 +1,102 @@
 <template>
+  <!-- ADMIN STUFF -->
+  <div v-if="this.$store.state.isAdmin">
+    ADMIN STUFF HERE
 
-
-
-
-<!-- ADMIN STUFF -->
-  <div v-if="this.$store.state.isAdmin">ADMIN STUFF HERE
-
- <p align="center">
-    <strong>
-      Welcome {{ this.firstName }}
+    <p align="center">
+      <strong>
+        Welcome {{ this.firstName }}
+        <br />
+        <br />
+        You are currently logged in as a
+        {{ this.userType }} <br />
+      </strong>
       <br />
-      <br />
-      You are currently logged in as a
-      {{ this.userType }} <br />
-    </strong>
-    <br />
-  </p>
-
-
+    </p>
   </div>
 
-<!-- Regular User Stuff -->
-  <div align="center" v-else-if="!this.$store.state.isAdmin">REGULAR USER STUFF HERE
+  <!-- Regular User Stuff -->
+  <div align="center" v-else-if="!this.$store.state.isAdmin">
+    REGULAR USER STUFF HERE
 
+    <v-container class="grey lighten-5" fill-height fluid>
+      <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
+        <p>
+          <strong>
+            Welcome {{ this.firstName }}
+            <br />
+            <br />
+            You are currently logged in as a
+            {{ this.userType }} User <br />
+          </strong>
+          <br />
+        </p>
 
+        <validation-observer ref="observer" v-slot="{ invalid }">
+          <form @submit.prevent="submit">
+            <!-- Title   -->
+            <validation-provider
+              v-slot="{ errors }"
+              name="Title"
+              rules="required|max:20"
+            >
+              <v-text-field
+                v-model="form.title"
+                :counter="20"
+                :error-messages="errors"
+                label="Title"
+                required
+              ></v-text-field>
+            </validation-provider>
 
+            <!-- Description   -->
+            <validation-provider
+              v-slot="{ errors }"
+              name="Description"
+              rules="required|max:20"
+            >
+              <v-text-field
+                v-model="form.description"
+                :counter="20"
+                :error-messages="errors"
+                label="Description"
+                required
+              ></v-text-field>
+            </validation-provider>
 
+            <!-- Amount   -->
 
-   <v-container class="grey lighten-5" fill-height fluid>
+                        <validation-provider
+              v-slot="{ errors }"
+              name="Reimbursment Amount"
+              rules="required|digits_between:1,8"
+            >
+              <v-text-field
+                v-model="form.amount"
+                :error-messages="errors"
+                label="Reimbursment Amount"
+                required
+              ></v-text-field>
+            </validation-provider>
+ 
+            <br>
+            <br>
 
-
-
-
-
-    <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
-     <p>
-    <strong>
-      Welcome {{ this.firstName }}
-      <br />
-      <br /> 
-      You are currently logged in as a
-      {{ this.userType }} User <br />
-    </strong>
-    <br />
-  </p>
-
-      <validation-observer ref="observer" v-slot="{ invalid }">
-        <form @submit.prevent="submit">
-          <!-- Title   -->
-          <validation-provider
-            v-slot="{ errors }"
-            name="Title"
-            rules="required|max:20"
-          >
-            <v-text-field
-              v-model="form.title"
-              :counter="20"
-              :error-messages="errors"
-              label="Title"
-              required
-            ></v-text-field>
-          </validation-provider>
-
-          <!-- Description   -->
-          <validation-provider
-            v-slot="{ errors }"
-            name="Description"
-            rules="required|max:20"
-          >
-            <v-text-field
-              v-model="form.description"
-              :counter="20"
-              :error-messages="errors"
-              label="Description"
-              required
-            ></v-text-field>
-          </validation-provider>
-
-                    <!-- Amount   -->
-          <validation-provider
-            v-slot="{ errors }"
-            name="Amount"
-            rules="required|max:20"
-          >
-            <v-text-field
-              v-model="form.amount"
-              :counter="20"
-              :error-messages="errors"
-              label="Amount"
-              required
-            ></v-text-field>
-          </validation-provider>
-
-          <v-btn class="mr-4" type="submit" :disabled="invalid">
-            submit
-          </v-btn>
-          <v-btn @click="clear">
-            clear
-          </v-btn>
-        </form>
-      </validation-observer>
-    </v-card>
-  </v-container>
-
-
+            <v-btn class="mr-4" type="submit" :disabled="invalid">
+              submit
+            </v-btn>
+            <v-btn @click="clear">
+              clear
+            </v-btn>
+          </form>
+        </validation-observer>
+        <br />
+        <v-btn>
+          Get Current Requests.
+        </v-btn>
+      </v-card>
+    </v-container>
   </div>
-
 </template>
 
 <script>
@@ -118,6 +109,8 @@ import {
   ValidationProvider,
   setInteractionMode,
 } from "vee-validate";
+import { min, numeric } from "vee-validate/dist/rules";
+import { validate } from "vee-validate";
 
 setInteractionMode("eager");
 
@@ -145,12 +138,22 @@ extend("email", {
   ...email,
   message: "Email must be valid",
 });
+extend("min", min);
+extend("max", max);
+extend("numeric", numeric);
 
-
+extend("digits_between", {
+  async validate(value, { min, max }) {
+    const res = await validate(value, `numeric|min:${min}|max:${max}`);
+    return res.valid;
+  },
+  params: ["min", "max"],
+  message: "The {_field_} must be between {min} and {max} digits",
+});
 
 export default {
   components: {
-      ValidationProvider,
+    ValidationProvider,
     ValidationObserver,
   },
   created() {
@@ -163,7 +166,7 @@ export default {
     })
       .then(async (response) => {
         if (!response.ok) {
-          this.id = response.data.id
+          this.id = response.data.id;
           this.firstName = response.data.firstName;
           if (response.data.userType == "R") {
             this.userType = "Regular";
@@ -180,22 +183,20 @@ export default {
   },
   data() {
     return {
-      form:{
-            title: "",
-            description: "",
-            amount: null
+      form: {
+        title: "",
+        description: "",
+        amount: null,
       },
       id: null,
       firstName: "",
-      userType:""
+      userType: "",
     };
   },
   methods: {
- clear() {
+    clear() {
       this.firstName = "";
     },
-
-
   },
 };
 </script>

@@ -115,18 +115,12 @@ export default {
         })
         .then(async (response) => {
           if (!response.ok) {
-            console.log(response.data.message);
             this.errorMessage = "";
             this.successMessage = response.data.message;
             this.routingMessage = "Now routing you to Dashboard page";
           
             
-            //VUEX STUFF
             store.commit('logUserIn')
-             console.log(this.$store.state.isLoggedIn)
-             console.log(this.$store.getters.loggedIn)
-
-            //VUEX STUFF
 
             setTimeout(() => {
               this.$router.push("/dashboard");
