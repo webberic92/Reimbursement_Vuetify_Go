@@ -16,5 +16,6 @@ func ConnectToDB() {
 
 	DB = connection
 	connection.AutoMigrate(&models.User{})
+	connection.AutoMigrate(&models.Reimbursment{})
 
 }

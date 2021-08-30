@@ -53,11 +53,11 @@
             <validation-provider
               v-slot="{ errors }"
               name="Description"
-              rules="required|max:20"
+              rules="required|max:200"
             >
               <v-text-field
                 v-model="form.description"
-                :counter="20"
+                :counter="200"
                 :error-messages="errors"
                 label="Description"
                 required
@@ -66,7 +66,7 @@
 
             <!-- Amount   -->
 
-                        <validation-provider
+            <validation-provider
               v-slot="{ errors }"
               name="Reimbursment Amount"
               rules="required|digits_between:1,8"
@@ -78,9 +78,9 @@
                 required
               ></v-text-field>
             </validation-provider>
- 
-            <br>
-            <br>
+
+            <br />
+            <br />
 
             <v-btn class="mr-4" type="submit" :disabled="invalid">
               submit
@@ -101,6 +101,8 @@
 
 <script>
 import Axios from "axios";
+import axios from "axios";
+
 import store from "..//store/index";
 import { required, digits, email, max, regex } from "vee-validate/dist/rules";
 import {
@@ -166,7 +168,7 @@ export default {
     })
       .then(async (response) => {
         if (!response.ok) {
-          this.id = response.data.id;
+          this.form.userId = response.data.id;
           this.firstName = response.data.firstName;
           if (response.data.userType == "R") {
             this.userType = "Regular";
@@ -181,22 +183,47 @@ export default {
         this.$router.push("/");
       });
   },
+   
   data() {
     return {
       form: {
+        userId: "",
         title: "",
         description: "",
-        amount: null,
+        amount: "",
       },
-      id: null,
       firstName: "",
       userType: "",
     };
   },
   methods: {
     clear() {
-      this.firstName = "";
+     // this.firstName = "";
     },
+     submit() { 
+      console.log(JSON.stringify(this.form));
+      axios({
+        method: "post",
+        url: "http://localhost:8000/api/reimbursment",
+        data: this.form,
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            console.log(response.data.message);
+            this.errorMessage = "";
+            this.successMessage = response.data.message;
+            this.routingMessage = "Now routing you to login page";
+            setTimeout(() => {
+              this.$router.push("/login");
+            }, 7000);
+          }
+        })
+        .catch((error) => {
+          console.log(error.response.data.message);
+          this.errorMessage = error.response.data.message;
+          this.successMessage - "";
+        });
+    }
   },
 };
 </script>
