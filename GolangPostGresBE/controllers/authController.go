@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -267,63 +268,11 @@ func CreateReimbursment(c *fiber.Ctx) error {
 		ApprovedBy:    data["approvedBy"],
 	}
 
-	// if data["firstName"] == "" {
-	// 	c.Status(fiber.StatusBadRequest)
-
-	// 	return c.JSON(fiber.Map{
-	// 		"message": "No first name provided.",
-	// 	})
-	// }
-
-	// if data["lastName"] == "" {
-	// 	c.Status(fiber.StatusBadRequest)
-
-	// 	return c.JSON(fiber.Map{
-	// 		"message": "No last name provided.",
-	// 	})
-	// }
-
-	// if data["email"] == "" {
-	// 	c.Status(fiber.StatusBadRequest)
-
-	// 	return c.JSON(fiber.Map{
-	// 		"message": "No email provided",
-	// 	})
-	// }
-	// if data["phoneNumber"] == "" {
-	// 	c.Status(fiber.StatusBadRequest)
-
-	// 	return c.JSON(fiber.Map{
-	// 		"message": "No phone number provided",
-	// 	})
-	// }
-	// if data["password"] == "" {
-	// 	c.Status(fiber.StatusBadRequest)
-
-	// 	return c.JSON(fiber.Map{
-	// 		"message": "No password provided.",
-	// 	})
-	// }
-
-	// if data["userType"] == "" {
-	// 	c.Status(fiber.StatusBadRequest)
-
-	// 	return c.JSON(fiber.Map{
-	// 		"message": "No user type provided.",
-	// 	})
-	// }
-
-	// if data["sou"] == "" {
-	// 	c.Status(fiber.StatusBadRequest)
-
-	// 	return c.JSON(fiber.Map{
-	// 		"message": "No statement of understanding provided.",
-	// 	})
-	// }
-
 	//if err := database.DB.Where("email = ?", data["email"]).First(&user).Error; err != nil {
 
 	database.DB.Create(&reimbursment)
+	latest := database.DB.Last(&reimbursment)
+	fmt.Println("The last pulled reimbursment: ", latest)
 	return c.JSON(fiber.Map{
 		"message": "You Successfully created a new reimbursment.",
 	})

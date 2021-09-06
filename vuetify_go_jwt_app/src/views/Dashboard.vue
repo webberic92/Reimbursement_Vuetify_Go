@@ -104,7 +104,7 @@ import Axios from "axios";
 import axios from "axios";
 
 import store from "..//store/index";
-import { required, digits, email, max, regex } from "vee-validate/dist/rules";
+import { required, digits,  max, regex } from "vee-validate/dist/rules";
 import {
   extend,
   ValidationObserver,
@@ -136,10 +136,6 @@ extend("regex", {
   message: "{_field_} {_value_} does not match {regex}",
 });
 
-extend("email", {
-  ...email,
-  message: "Email must be valid",
-});
 extend("min", min);
 extend("max", max);
 extend("numeric", numeric);
@@ -169,6 +165,8 @@ export default {
       .then(async (response) => {
         if (!response.ok) {
           this.form.userId = response.data.id;
+          store.commit("setUserId", this.form.userId)
+          console.log(" this is the user id : ", store.getters.userId)
           this.firstName = response.data.firstName;
           if (response.data.userType == "R") {
             this.userType = "Regular";
@@ -198,30 +196,27 @@ export default {
   },
   methods: {
     clear() {
-     // this.firstName = "";
+      console.log(JSON.stringify(this.form));
     },
      submit() { 
+       this.form.userId = this.form.userId.toString()
       console.log(JSON.stringify(this.form));
       axios({
         method: "post",
-        url: "http://localhost:8000/api/reimbursment",
+        url: "http://localhost:8000/api/createReimbursment",
         data: this.form,
-      })
+        withCredentials: true})
         .then(async (response) => {
           if (!response.ok) {
-            console.log(response.data.message);
+            console.log(response);
             this.errorMessage = "";
             this.successMessage = response.data.message;
-            this.routingMessage = "Now routing you to login page";
-            setTimeout(() => {
-              this.$router.push("/login");
-            }, 7000);
           }
         })
         .catch((error) => {
           console.log(error.response.data.message);
           this.errorMessage = error.response.data.message;
-          this.successMessage - "";
+          this.successMessage = "";
         });
     }
   },
