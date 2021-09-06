@@ -226,3 +226,106 @@ func Logout(c *fiber.Ctx) error {
 	}
 
 }
+
+func GetReimbursment(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "Unauthenticated User",
+		})
+	}
+	claims := token.Claims.(*jwt.StandardClaims)
+	var reimbursment models.Reimbursment
+
+	database.DB.Where("id = ?", claims.Issuer).First(&reimbursment)
+
+	return c.JSON(reimbursment)
+
+}
+func CreateReimbursment(c *fiber.Ctx) error {
+
+	var data map[string]string
+	c.BodyParser(&data)
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	reimbursment := models.Reimbursment{
+
+		UserID:        data["userId"],
+		Title:         data["title"],
+		Description:   data["description"],
+		Amount:        data["amount"],
+		AppovedStatus: data["approvedStatus"],
+		DateApproved:  data["dateApproved"],
+		ApprovedBy:    data["approvedBy"],
+	}
+
+	// if data["firstName"] == "" {
+	// 	c.Status(fiber.StatusBadRequest)
+
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "No first name provided.",
+	// 	})
+	// }
+
+	// if data["lastName"] == "" {
+	// 	c.Status(fiber.StatusBadRequest)
+
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "No last name provided.",
+	// 	})
+	// }
+
+	// if data["email"] == "" {
+	// 	c.Status(fiber.StatusBadRequest)
+
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "No email provided",
+	// 	})
+	// }
+	// if data["phoneNumber"] == "" {
+	// 	c.Status(fiber.StatusBadRequest)
+
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "No phone number provided",
+	// 	})
+	// }
+	// if data["password"] == "" {
+	// 	c.Status(fiber.StatusBadRequest)
+
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "No password provided.",
+	// 	})
+	// }
+
+	// if data["userType"] == "" {
+	// 	c.Status(fiber.StatusBadRequest)
+
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "No user type provided.",
+	// 	})
+	// }
+
+	// if data["sou"] == "" {
+	// 	c.Status(fiber.StatusBadRequest)
+
+	// 	return c.JSON(fiber.Map{
+	// 		"message": "No statement of understanding provided.",
+	// 	})
+	// }
+
+	//if err := database.DB.Where("email = ?", data["email"]).First(&user).Error; err != nil {
+
+	database.DB.Create(&reimbursment)
+	return c.JSON(fiber.Map{
+		"message": "You Successfully created a new reimbursment.",
+	})
+
+}
