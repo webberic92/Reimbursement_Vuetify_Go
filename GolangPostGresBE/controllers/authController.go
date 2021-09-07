@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -271,10 +270,7 @@ func CreateReimbursment(c *fiber.Ctx) error {
 	//if err := database.DB.Where("email = ?", data["email"]).First(&user).Error; err != nil {
 
 	database.DB.Create(&reimbursment)
-	latest := database.DB.Last(&reimbursment)
-	fmt.Println("The last pulled reimbursment: ", latest)
-	return c.JSON(fiber.Map{
-		"message": "You Successfully created a new reimbursment.",
-	})
+
+	return c.JSON(reimbursment)
 
 }

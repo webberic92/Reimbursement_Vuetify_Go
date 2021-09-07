@@ -93,7 +93,24 @@
         <br />
         <v-btn>
           Get Current Requests.
-        </v-btn>
+        </v-btn>   
+        <br>
+        <br>
+      <!-- Messages -->
+      <p v-if="errorMessage" align="center" style="color:red">
+        <strong>
+          {{ errorMessage }}
+        </strong>
+      </p>
+      <p v-if="successMessage" align="center" style="color:green">
+        <strong>{{ successMessage }}</strong>
+      </p>
+       <v-data-table
+    :headers="headers"
+    :items="desserts"
+    :items-per-page="5"
+    class="elevation-1"
+  ></v-data-table>
       </v-card>
     </v-container>
   </div>
@@ -192,6 +209,37 @@ export default {
       },
       firstName: "",
       userType: "",
+      errorMessage: "",
+      successMessage: "",
+       headers: [
+          {
+            text: 'Reimbursment ID',
+            align: 'start',
+            sortable: false,
+            value: 'name',
+          },
+          { text: 'Requestor', value: 'calories' },
+          { text: 'Title', value: 'fat' },
+          { text: 'Description', value: 'carbs' },
+          { text: 'Amount', value: 'protein' },
+        ],
+        desserts: [
+          {
+            name: 'Frozen Yogurt',
+            calories: 159,
+            fat: 6.0,
+            carbs: 24,
+            protein: 4.0,
+            iron: '1%',
+          },
+          {
+            name: 'Ice cream sandwich',
+            calories: 237,
+            fat: 9.0,
+            carbs: 37,
+            protein: 4.3,
+            iron: '1%',
+          }]
     };
   },
   methods: {
@@ -207,11 +255,10 @@ export default {
         data: this.form,
         withCredentials: true})
         .then(async (response) => {
-          if (!response.ok) {
             console.log(response);
             this.errorMessage = "";
-            this.successMessage = response.data.message;
-          }
+            this.successMessage = response.data;
+          
         })
         .catch((error) => {
           console.log(error.response.data.message);
