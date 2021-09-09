@@ -93,24 +93,27 @@
         <br />
         <v-btn>
           Get Current Requests.
-        </v-btn>   
-        <br>
-        <br>
-      <!-- Messages -->
-      <p v-if="errorMessage" align="center" style="color:red">
-        <strong>
-          {{ errorMessage }}
-        </strong>
-      </p>
-      <p v-if="successMessage" align="center" style="color:green">
-        <strong>{{ successMessage }}</strong>
-      </p>
-       <v-data-table
-    :headers="headers"
-    :items="desserts"
-    :items-per-page="5"
-    class="elevation-1"
-  ></v-data-table>
+        </v-btn>
+        <br />
+        <br />
+        <!-- Messages -->
+        <p v-if="errorMessage" align="center" style="color:red">
+          <strong>
+            {{ errorMessage }}
+          </strong>
+        </p>
+        <p v-if="successMessage" align="center" style="color:green">
+          <strong>{{ successMessage }}</strong>
+          <!-- New Reimbursment created table -->
+          <v-data-table
+            v-if="this.submittedReimburement[0].rId != null"
+            :headers="headers"
+            :items="submittedReimburement"
+            :items-per-page="1"
+            class="elevation-1"
+          ></v-data-table>
+          <!-- New Reimbursment created table -->
+        </p>
       </v-card>
     </v-container>
   </div>
@@ -121,7 +124,7 @@ import Axios from "axios";
 import axios from "axios";
 
 import store from "..//store/index";
-import { required, digits,  max, regex } from "vee-validate/dist/rules";
+import { required, digits, max, regex } from "vee-validate/dist/rules";
 import {
   extend,
   ValidationObserver,
@@ -182,8 +185,7 @@ export default {
       .then(async (response) => {
         if (!response.ok) {
           this.form.userId = response.data.id;
-          store.commit("setUserId", this.form.userId)
-          console.log(" this is the user id : ", store.getters.userId)
+          store.commit("setUserId", this.form.userId);
           this.firstName = response.data.firstName;
           if (response.data.userType == "R") {
             this.userType = "Regular";
@@ -198,7 +200,7 @@ export default {
         this.$router.push("/");
       });
   },
-   
+
   data() {
     return {
       form: {
@@ -211,61 +213,66 @@ export default {
       userType: "",
       errorMessage: "",
       successMessage: "",
-       headers: [
-          {
-            text: 'Reimbursment ID',
-            align: 'start',
-            sortable: false,
-            value: 'name',
-          },
-          { text: 'Requestor', value: 'calories' },
-          { text: 'Title', value: 'fat' },
-          { text: 'Description', value: 'carbs' },
-          { text: 'Amount', value: 'protein' },
-        ],
-        desserts: [
-          {
-            name: 'Frozen Yogurt',
-            calories: 159,
-            fat: 6.0,
-            carbs: 24,
-            protein: 4.0,
-            iron: '1%',
-          },
-          {
-            name: 'Ice cream sandwich',
-            calories: 237,
-            fat: 9.0,
-            carbs: 37,
-            protein: 4.3,
-            iron: '1%',
-          }]
+      headers: [
+        {
+          text: "Reimbursment ID",
+          align: "start",
+          sortable: false,
+          value: "rId",
+        },
+        { text: "Requestor", value: "requestor" },
+        { text: "Title", value: "title" },
+        { text: "Description", value: "description" },
+        { text: "Amount", value: "amount" },
+      ],
+      submittedReimburement: [
+        {
+          rId: null,
+          requestor: null,
+          title: "",
+          description: "",
+          amount: null,
+        },
+      ],
     };
   },
   methods: {
     clear() {
-      console.log(JSON.stringify(this.form));
+      this.submittedReimburement[0].rId = null;
+      this.submittedReimburement[0].requestor = null;
+      this.submittedReimburement[0].title = "";
+      this.submittedReimburement[0].description = "";
+      this.submittedReimburement[0].amount = null;
+      this.successMessage = "";
+      this.errorMessage = "";
+      this.title = "";
+      this.description = "";
+      this.amount = "";
     },
-     submit() { 
-       this.form.userId = this.form.userId.toString()
-      console.log(JSON.stringify(this.form));
+    submit() {
+      this.form.userId = this.form.userId.toString();
       axios({
         method: "post",
         url: "http://localhost:8000/api/createReimbursment",
         data: this.form,
-        withCredentials: true})
+        withCredentials: true,
+      })
         .then(async (response) => {
-            console.log(response);
-            this.errorMessage = "";
-            this.successMessage = response.data;
-          
+          this.errorMessage = "";
+          this.submittedReimburement[0].rId = response.data.RequestId;
+          this.submittedReimburement[0].requestor = response.data.userID;
+          this.submittedReimburement[0].title = response.data.title;
+          this.submittedReimburement[0].description = response.data.description;
+          this.submittedReimburement[0].amount = response.data.amount;
+          this.successMessage =
+            "You successfully created a new Reimbursment Request.";
         })
         .catch((error) => {
           console.log(error.response.data.message);
           this.errorMessage = error.response.data.message;
           this.successMessage = "";
         });
-    }
+    },
   },
 };
 </script>
