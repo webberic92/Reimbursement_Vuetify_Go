@@ -102,17 +102,32 @@
             {{ errorMessage }}
           </strong>
         </p>
-        <p v-if="successMessage" align="center" style="color:green">
-          <strong>{{ successMessage }}</strong>
-          <!-- New Reimbursment created table -->
+        <!-- New Reimbursment created table -->
+
+        <p v-if="createReimbursmentMessage" align="center" style="color:green">
+          <strong>{{ createReimbursmentMessage }}</strong>
           <v-data-table
-            v-if="this.submittedReimburement[0].rId != null"
-            :headers="headers"
-            :items="submittedReimburement"
+            v-if="this.submitted[0].rId != null"
+            :headers="submittedHeaders"
+            :items="submitted"
             :items-per-page="1"
             class="elevation-1"
           ></v-data-table>
           <!-- New Reimbursment created table -->
+        </p>
+        <br />
+
+        <!-- Get Open Reimbursements -->
+        <p v-if="getReimbursementMessage" align="center" style="color:green">
+          <strong>{{ getReimbursementMessage }}</strong>
+          <v-data-table
+            :headers="currentHeaders"
+            :items="current"
+            :items-per-page="10"
+            class="elevation-1"
+          >
+          </v-data-table>
+          <!-- Get Open Reimbursements -->
         </p>
       </v-card>
     </v-container>
@@ -212,8 +227,9 @@ export default {
       firstName: "",
       userType: "",
       errorMessage: "",
-      successMessage: "",
-      headers: [
+      createReimbursmentMessage: "",
+      getReimbursementMessage: "",
+      submittedHeaders: [
         {
           text: "Reimbursment ID",
           align: "start",
@@ -225,10 +241,31 @@ export default {
         { text: "Description", value: "description" },
         { text: "Amount", value: "amount" },
       ],
-      submittedReimburement: [
+      submitted: [
         {
           rId: null,
           requestor: null,
+          title: "",
+          description: "",
+          amount: null,
+        },
+      ],
+      currentHeaders: [
+        {
+          text: "Reimbursment ID",
+          align: "start",
+          sortable: false,
+          value: "RequestId",
+        },
+        { text: "Requestor", value: "userID" },
+        { text: "Title", value: "title" },
+        { text: "Description", value: "description" },
+        { text: "Amount", value: "amount" },
+      ],
+      current: [
+        {
+          RequestId: null,
+          userID: null,
           title: "",
           description: "",
           amount: null,
@@ -238,19 +275,21 @@ export default {
   },
   methods: {
     clear() {
-      this.submittedReimburement[0].rId = null;
-      this.submittedReimburement[0].requestor = null;
-      this.submittedReimburement[0].title = "";
-      this.submittedReimburement[0].description = "";
-      this.submittedReimburement[0].amount = null;
-      this.successMessage = "";
+      this.submitted[0].rId = null;
+      this.submitted[0].requestor = null;
+      this.submitted[0].title = "";
+      this.submitted[0].description = "";
+      this.submitted[0].amount = null;
+      this.createReimbursmentMessage = "";
       this.errorMessage = "";
-      this.title = "";
-      this.description = "";
-      this.amount = "";
+      this.form.title = "";
+      this.form.description = "";
+      this.form.amount = "";
+      this.getReimbursementMessage = "";
     },
     submit() {
       this.form.userId = this.form.userId.toString();
+      console.log(this.form);
       axios({
         method: "post",
         url: "http://localhost:8000/api/createReimbursment",
@@ -259,43 +298,51 @@ export default {
       })
         .then(async (response) => {
           this.errorMessage = "";
-          this.submittedReimburement[0].rId = response.data.RequestId;
-          this.submittedReimburement[0].requestor = response.data.userID;
-          this.submittedReimburement[0].title = response.data.title;
-          this.submittedReimburement[0].description = response.data.description;
-          this.submittedReimburement[0].amount = response.data.amount;
-          this.successMessage =
+          this.submitted[0].rId = response.data.RequestId;
+          this.submitted[0].requestor = response.data.userID;
+          this.submitted[0].title = response.data.title;
+          this.submitted[0].description = response.data.description;
+          this.submitted[0].amount = "$" + response.data.amount;
+          this.createReimbursmentMessage =
             "You successfully created a new Reimbursment Request.";
         })
         .catch((error) => {
           console.log(error.response.data.message);
           this.errorMessage = error.response.data.message;
-          this.successMessage = "";
+          this.createReimbursmentMessage = "";
         });
     },
-        getOpenRequests() {
-console.log("getopenrequestes button hit.")   
-  //  axios({
-  //       method: "post",
-  //       url: "http://localhost:8000/api/createReimbursment",
-  //       data: this.form,
-  //       withCredentials: true,
-  //     })
-  //       .then(async (response) => {
-  //         this.errorMessage = "";
-  //         this.submittedReimburement[0].rId = response.data.RequestId;
-  //         this.submittedReimburement[0].requestor = response.data.userID;
-  //         this.submittedReimburement[0].title = response.data.title;
-  //         this.submittedReimburement[0].description = response.data.description;
-  //         this.submittedReimburement[0].amount = response.data.amount;
-  //         this.successMessage =
-  //           "You successfully created a new Reimbursment Request.";
-  //       })
-  //       .catch((error) => {
-  //         console.log(error.response.data.message);
-  //         this.errorMessage = error.response.data.message;
-  //         this.successMessage = "";
-  //       });
+    getOpenRequests() {
+      axios({
+        method: "post",
+        url: "http://localhost:8000/api/getReimbursments",
+        withCredentials: true,
+      })
+        .then(async (response) => {
+          console.log(response.data);
+
+          for (var x of response.data) {
+            x.amount = "$" + x.amount;
+
+            console.log("console log x ...");
+
+            console.log(x);
+
+            this.current.push(x);
+          }
+          this.$delete(this.current, 0);
+          console.log("this current...");
+
+          console.log(this.current);
+
+          this.getReimbursementMessage =
+            "You successfully loaded  all Reimbursment Requests.";
+        })
+        .catch((error) => {
+          console.log(error.response);
+          this.errorMessage = error.response;
+          this.successMessage = "";
+        });
     },
   },
 };
