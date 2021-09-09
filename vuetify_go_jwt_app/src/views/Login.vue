@@ -107,8 +107,6 @@ export default {
   methods: {
     submit() {
       this.$refs.observer.validate();
-      console.log("submit button hit");
-      console.log(JSON.stringify(this.form));
       axios
         .post("http://localhost:8000/api/login", this.form, {
           withCredentials: true,

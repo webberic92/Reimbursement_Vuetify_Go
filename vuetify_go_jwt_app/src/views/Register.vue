@@ -241,7 +241,7 @@ export default {
         .catch((error) => {
           console.log(error.response.data.message);
           this.errorMessage = error.response.data.message;
-          this.successMessage - "";
+          this.successMessage = "";
         });
     },
     clear() {

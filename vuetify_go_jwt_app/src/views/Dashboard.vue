@@ -91,7 +91,7 @@
           </form>
         </validation-observer>
         <br />
-        <v-btn>
+        <v-btn @click="getOpenRequests">
           Get Current Requests.
         </v-btn>
         <br />
@@ -272,6 +272,30 @@ export default {
           this.errorMessage = error.response.data.message;
           this.successMessage = "";
         });
+    },
+        getOpenRequests() {
+console.log("getopenrequestes button hit.")   
+  //  axios({
+  //       method: "post",
+  //       url: "http://localhost:8000/api/createReimbursment",
+  //       data: this.form,
+  //       withCredentials: true,
+  //     })
+  //       .then(async (response) => {
+  //         this.errorMessage = "";
+  //         this.submittedReimburement[0].rId = response.data.RequestId;
+  //         this.submittedReimburement[0].requestor = response.data.userID;
+  //         this.submittedReimburement[0].title = response.data.title;
+  //         this.submittedReimburement[0].description = response.data.description;
+  //         this.submittedReimburement[0].amount = response.data.amount;
+  //         this.successMessage =
+  //           "You successfully created a new Reimbursment Request.";
+  //       })
+  //       .catch((error) => {
+  //         console.log(error.response.data.message);
+  //         this.errorMessage = error.response.data.message;
+  //         this.successMessage = "";
+  //       });
     },
   },
 };

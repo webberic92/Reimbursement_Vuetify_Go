@@ -3,18 +3,13 @@
 </template>
 
 <script>
-  import HelloWorld from '../components/HelloWorld'
-// import store from "..//store/index"
+import HelloWorld from "../components/HelloWorld";
 
-  export default {
-     created() {
-            console.log(this.$store.state.isLoggedIn)
-             console.log(this.$store.getters.loggedIn)
-     },
-    name: 'Home',
+export default {
+  name: "Home",
 
-    components: {
-      HelloWorld,
-    },
-  }
+  components: {
+    HelloWorld,
+  },
+};
 </script>
