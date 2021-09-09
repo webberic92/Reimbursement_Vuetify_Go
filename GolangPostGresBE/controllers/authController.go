@@ -229,6 +229,20 @@ func Logout(c *fiber.Ctx) error {
 
 func CreateReimbursment(c *fiber.Ctx) error {
 
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "Unauthenticated User",
+		})
+	}
+	claims := token.Claims.(*jwt.StandardClaims)
+
 	var data map[string]string
 	c.BodyParser(&data)
 	if err := c.BodyParser(&data); err != nil {
@@ -237,16 +251,14 @@ func CreateReimbursment(c *fiber.Ctx) error {
 
 	reimbursment := models.Reimbursment{
 
-		UserID:         data["userId"],
+		UserID:         claims.Issuer,
 		Title:          data["title"],
 		Description:    data["description"],
 		Amount:         data["amount"],
-		ApprovedStatus: data["approvedStatus"],
-		DateApproved:   data["dateApproved"],
-		ApprovedBy:     data["approvedBy"],
+		ApprovedStatus: "",
+		DateApproved:   "",
+		ApprovedBy:     "",
 	}
-
-	//if err := database.DB.Where("email = ?", data["email"]).First(&user).Error; err != nil {
 
 	database.DB.Create(&reimbursment)
 
@@ -270,8 +282,6 @@ func GetReimbursments(c *fiber.Ctx) error {
 	claims := token.Claims.(*jwt.StandardClaims)
 	var reimbursment []models.Reimbursment
 
-	// database.DB.Where("user_id = ?", claims.Issuer, "approved_status != A | P").Find(&reimbursment)
-	// database.DB.Where("user_id = ?", claims.Issuer).Find(&reimbursment)
 	database.DB.Where(map[string]interface{}{"user_id": claims.Issuer, "approved_status": ""}).Find(&reimbursment)
 	return c.JSON(reimbursment)
 
