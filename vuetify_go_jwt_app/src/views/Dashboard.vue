@@ -29,12 +29,16 @@
                 <td>{{ row.item.description }}</td>
                 <td>{{ row.item.amount }}</td>
                 <td>
-                  <v-btn color="success" @click="approveOrDeny('A', row.item.RequestId)"
+                  <v-btn
+                    color="success"
+                    @click="approveOrDeny('A', row.item.RequestId)"
                     >Approve</v-btn
                   >
                 </td>
                 <td>
-                  <v-btn color="error" @click="approveOrDeny('D', row.item.RequestId)"
+                  <v-btn
+                    color="error"
+                    @click="approveOrDeny('D', row.item.RequestId)"
                     >Deny</v-btn
                   >
                 </td>
@@ -324,8 +328,8 @@ export default {
         { text: "Title", value: "title" },
         { text: "Description", value: "description" },
         { text: "Amount", value: "amount" },
-        { text: "Approve", value: "approve" },
-        { text: "Deny", value: "deny" },
+        { text: "Approve" },
+        { text: "Deny" },
       ],
       adminCurrent: [
         {
@@ -334,8 +338,7 @@ export default {
           title: "",
           description: "",
           amount: null,
-          approve: "",
-          deny: "",
+          approveOrDeny: "",
         },
       ],
     };
@@ -427,8 +430,35 @@ export default {
           this.errorMessage = error.response;
         });
     },
-    approveOrDeny(option,requestId) {
-console.log("Approve or Deny clicked with the option = " + option + " and the requestId = " + requestId)
+    approveOrDeny(approveOrDeny, requestId) {
+      console.log(
+        "Approve or Deny clicked with the option = " +
+          approveOrDeny +
+          " and the requestId = " +
+          requestId
+      );
+      axios({
+        method: "post",
+        url: "http://localhost:8000/api/approveOrDeny",
+        withCredentials: true,
+          data: {
+    requestId : requestId,
+    approveOrDeny: approveOrDeny
+  },
+      })
+        .then(async (response) => {
+          for (var x of response.data) {
+            x.amount = "$" + x.amount;
+
+            this.adminCurrent.push(x);
+          }
+          this.getReimbursementMessage =
+            "You successfully approved or denied a Reimbursment Requests.";
+        })
+        .catch((error) => {
+          console.log(error.response);
+          this.getReimbursementMessage = error.response.data;
+        });
     },
   },
 };

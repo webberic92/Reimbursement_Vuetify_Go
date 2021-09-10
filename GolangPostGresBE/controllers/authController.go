@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -328,4 +329,47 @@ func GetAllOpenReimbursments(c *fiber.Ctx) error {
 		database.DB.Where(map[string]interface{}{"approved_status": ""}).Find(&reimbursment)
 	}
 	return c.JSON(reimbursment)
+}
+
+func ApproveOrDeny(c *fiber.Ctx) error {
+
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "Unauthenticated User",
+		})
+	}
+	claims := token.Claims.(*jwt.StandardClaims)
+
+	var data map[string]string
+	c.BodyParser(&data)
+	if err := c.BodyParser(&data); err != nil {
+		return err
+	}
+
+	// requestId,err := strconv.Atoi(data["requestId"])
+	requestId, err := strconv.ParseUint(data["requestId"], 10, 32)
+	if err != nil {
+		fmt.Println(err)
+	}
+	rID := uint(requestId)
+
+	reimbursment := models.Reimbursment{
+
+		RequestId:      rID,
+		ApprovedStatus: "", // need date from fe hre should be data["approveOrDeny"]
+		DateApproved:   "", //Need todays date here.
+		ApprovedBy:     claims.Issuer,
+	}
+
+	database.DB.Create(&reimbursment)
+
+	return c.JSON(reimbursment)
+
 }
