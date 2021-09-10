@@ -286,3 +286,24 @@ func GetReimbursments(c *fiber.Ctx) error {
 	return c.JSON(reimbursment)
 
 }
+
+func GetHistory(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "Unauthenticated User",
+		})
+	}
+	claims := token.Claims.(*jwt.StandardClaims)
+	var reimbursment []models.Reimbursment
+
+	database.DB.Where(map[string]interface{}{"user_id": claims.Issuer, "approved_status": "A"}).Or(map[string]interface{}{"user_id": claims.Issuer, "approved_status": "D"}).Find(&reimbursment)
+	return c.JSON(reimbursment)
+
+}

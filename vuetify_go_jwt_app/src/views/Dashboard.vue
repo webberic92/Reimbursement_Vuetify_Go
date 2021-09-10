@@ -33,7 +33,7 @@
         </p>
 
         <validation-observer ref="observer" v-slot="{ invalid }">
-          <form @submit.prevent="submit">
+          <form @submit.prevent="submit" id="myForm">
             <!-- Title   -->
             <validation-provider
               v-slot="{ errors }"
@@ -282,14 +282,12 @@ export default {
       this.submitted[0].amount = null;
       this.createReimbursmentMessage = "";
       this.errorMessage = "";
-      this.form.title = "";
-      this.form.description = "";
-      this.form.amount = "";
+      document.getElementById("myForm").reset();
+
       this.getReimbursementMessage = "";
     },
     submit() {
       this.form.userId = this.form.userId.toString();
-      console.log(this.form);
       axios({
         method: "post",
         url: "http://localhost:8000/api/createReimbursment",
@@ -305,7 +303,9 @@ export default {
           this.submitted[0].amount = "$" + response.data.amount;
           this.createReimbursmentMessage =
             "You successfully created a new Reimbursment Request.";
+          document.getElementById("myForm").reset();
         })
+
         .catch((error) => {
           console.log(error.response.data.message);
           this.errorMessage = error.response.data.message;
@@ -313,28 +313,19 @@ export default {
         });
     },
     getOpenRequests() {
+      this.current = [];
       axios({
         method: "post",
         url: "http://localhost:8000/api/getReimbursments",
         withCredentials: true,
       })
         .then(async (response) => {
-          console.log(response.data);
-
           for (var x of response.data) {
             x.amount = "$" + x.amount;
 
-            console.log("console log x ...");
-
-            console.log(x);
-
             this.current.push(x);
           }
-          this.$delete(this.current, 0);
-          console.log("this current...");
-
-          console.log(this.current);
-
+          this.createReimbursmentMessage = "";
           this.getReimbursementMessage =
             "You successfully loaded  all Reimbursment Requests.";
         })

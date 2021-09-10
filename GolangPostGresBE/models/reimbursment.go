@@ -7,6 +7,6 @@ type Reimbursment struct {
 	Description    string `json:"description"`
 	Amount         string `json:"amount"`
 	ApprovedStatus string `json:"approvalStatus"`
-	DateApproved   string `json:"dateApporoved"`
+	DateApproved   string `json:"dateApproved"`
 	ApprovedBy     string `json:"approvedBy"`
 }
