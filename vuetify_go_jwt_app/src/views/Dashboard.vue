@@ -1,19 +1,61 @@
 <template>
-  <!-- ADMIN STUFF -->
-  <div v-if="this.$store.state.isAdmin">
+  <!-- BEGIN ADMIN STUFF -->
+  <div align="center" v-if="this.$store.state.isAdmin">
     ADMIN STUFF HERE
 
-    <p align="center">
-      <strong>
-        Welcome {{ this.firstName }}
+    <v-container class="grey lighten-5" fill-height fluid>
+      <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
+        <p align="center">
+          <strong>
+            Welcome {{ this.firstName }}
+            <br />
+            <br />
+            You are currently logged in as a
+            {{ this.userType }} <br />
+          </strong>
+          <br />
+        </p>
+
+        <!-- Get Open Reimbursements -->
+        <p v-if="getReimbursementMessage" align="center" style="color:green">
+          <strong>{{ getReimbursementMessage }}</strong>
+
+          <v-data-table :headers="adminCurrentHeaders" :items="adminCurrent">
+            <template v-slot:item="row">
+              <tr>
+                <td>{{ row.item.RequestId }}</td>
+                <td>{{ row.item.userID }}</td>
+                <td>{{ row.item.title }}</td>
+                <td>{{ row.item.description }}</td>
+                <td>{{ row.item.amount }}</td>
+                <td>
+                  <v-btn color="success" @click="approveOrDeny('A', row.item.RequestId)"
+                    >Approve</v-btn
+                  >
+                </td>
+                <td>
+                  <v-btn color="error" @click="approveOrDeny('D', row.item.RequestId)"
+                    >Deny</v-btn
+                  >
+                </td>
+              </tr>
+            </template>
+          </v-data-table>
+        </p>
+        <!-- Get Open Reimbursements -->
+
+        <v-btn @click="getAllOpenRequests">
+          Get All Open Requests.
+        </v-btn>
         <br />
         <br />
-        You are currently logged in as a
-        {{ this.userType }} <br />
-      </strong>
-      <br />
-    </p>
+        <v-btn @click="clearAdmin">
+          Clear
+        </v-btn>
+      </v-card>
+    </v-container>
   </div>
+  <!-- End ADMIN STUFF -->
 
   <!-- Regular User Stuff -->
   <div align="center" v-else-if="!this.$store.state.isAdmin">
@@ -271,6 +313,31 @@ export default {
           amount: null,
         },
       ],
+      adminCurrentHeaders: [
+        {
+          text: "Reimbursment ID",
+          align: "start",
+          sortable: false,
+          value: "RequestId",
+        },
+        { text: "Requestor", value: "userID" },
+        { text: "Title", value: "title" },
+        { text: "Description", value: "description" },
+        { text: "Amount", value: "amount" },
+        { text: "Approve", value: "approve" },
+        { text: "Deny", value: "deny" },
+      ],
+      adminCurrent: [
+        {
+          RequestId: null,
+          userID: null,
+          title: "",
+          description: "",
+          amount: null,
+          approve: "",
+          deny: "",
+        },
+      ],
     };
   },
   methods: {
@@ -284,6 +351,10 @@ export default {
       this.errorMessage = "";
       document.getElementById("myForm").reset();
 
+      this.getReimbursementMessage = "";
+    },
+    clearAdmin() {
+      this.adminCurrent = [];
       this.getReimbursementMessage = "";
     },
     submit() {
@@ -334,6 +405,30 @@ export default {
           this.errorMessage = error.response;
           this.successMessage = "";
         });
+    },
+    getAllOpenRequests() {
+      this.adminCurrent = [];
+      axios({
+        method: "post",
+        url: "http://localhost:8000/api/getAllOpenReimbursments",
+        withCredentials: true,
+      })
+        .then(async (response) => {
+          for (var x of response.data) {
+            x.amount = "$" + x.amount;
+
+            this.adminCurrent.push(x);
+          }
+          this.getReimbursementMessage =
+            "You successfully loaded  all Reimbursment Requests.";
+        })
+        .catch((error) => {
+          console.log(error.response);
+          this.errorMessage = error.response;
+        });
+    },
+    approveOrDeny(option,requestId) {
+console.log("Approve or Deny clicked with the option = " + option + " and the requestId = " + requestId)
     },
   },
 };
