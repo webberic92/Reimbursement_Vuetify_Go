@@ -16,5 +16,6 @@ func SetUp(app *fiber.App) {
 	app.Post("/api/getHistory", controllers.GetHistory)
 	app.Post("/api/getAllOpenReimbursments", controllers.GetAllOpenReimbursments)
 	app.Post("/api/approveOrDeny", controllers.ApproveOrDeny)
+	app.Post("/api/getAllHistory", controllers.GetAllHistory)
 
 }

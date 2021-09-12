@@ -15,11 +15,15 @@
           </strong>
           <br />
         </p>
-
+        <p v-if="ApproveOrDenyMessage" align="center" style="color:green">
+          <strong>{{ ApproveOrDenyMessage }}</strong>
+        </p>
         <!-- Get Open Reimbursements -->
-        <p v-if="getReimbursementMessage" align="center" style="color:green">
-          <strong>{{ getReimbursementMessage }}</strong>
+        <p v-if="loadOfOpenRequest" align="center" style="color:green">
 
+
+
+        
           <v-data-table :headers="adminCurrentHeaders" :items="adminCurrent">
             <template v-slot:item="row">
               <tr>
@@ -274,7 +278,8 @@ export default {
       userType: "",
       errorMessage: "",
       createReimbursmentMessage: "",
-      getReimbursementMessage: "",
+      ApproveOrDenyMessage: "",
+      loadOfOpenRequest: false,
       submittedHeaders: [
         {
           text: "Reimbursment ID",
@@ -353,12 +358,12 @@ export default {
       this.createReimbursmentMessage = "";
       this.errorMessage = "";
       document.getElementById("myForm").reset();
-
       this.getReimbursementMessage = "";
     },
     clearAdmin() {
       this.adminCurrent = [];
-      this.getReimbursementMessage = "";
+      this.ApproveOrDenyMessage = "";
+      this.loadOfOpenRequest = false;
     },
     submit() {
       this.form.userId = this.form.userId.toString();
@@ -422,8 +427,7 @@ export default {
 
             this.adminCurrent.push(x);
           }
-          this.getReimbursementMessage =
-            "You successfully loaded  all Reimbursment Requests.";
+          this.loadOfOpenRequest = true
         })
         .catch((error) => {
           console.log(error.response);
@@ -431,34 +435,30 @@ export default {
         });
     },
     approveOrDeny(approveOrDeny, requestId) {
-      console.log(
-        "Approve or Deny clicked with the option = " +
-          approveOrDeny +
-          " and the requestId = " +
-          requestId
-      );
       axios({
         method: "post",
         url: "http://localhost:8000/api/approveOrDeny",
         withCredentials: true,
-          data: {
-    requestId : requestId,
-    approveOrDeny: approveOrDeny
-  },
+        data: {
+          requestId: requestId.toString(),
+          approveOrDeny: approveOrDeny,
+        },
       })
         .then(async (response) => {
-          for (var x of response.data) {
-            x.amount = "$" + x.amount;
-
-            this.adminCurrent.push(x);
+          if (response.data.approvalStatus == "A") {
+            this.ApproveOrDenyMessage =
+              "You successfully approved Reimbursment Requests #" + response.data.RequestId;
+          } else {
+            this.ApproveOrDenyMessage =
+              "You successfully denied Reimbursment Requests #" + response.data.RequestId;
           }
-          this.getReimbursementMessage =
-            "You successfully approved or denied a Reimbursment Requests.";
+         this.getAllOpenRequests()
         })
         .catch((error) => {
-          console.log(error.response);
-          this.getReimbursementMessage = error.response.data;
+          console.log(error);
+          this.ApproveOrDenyMessage = error;
         });
+        
     },
   },
 };

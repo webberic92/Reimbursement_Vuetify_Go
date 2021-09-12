@@ -1,18 +1,46 @@
 <template>
-  <!-- ADMIN STUFF -->
-  <div v-if="this.$store.state.isAdmin">
-    ADMIN STUFF HERE
+  <!-- BEGIN ADMIN STUFF -->
+  <div align="center" v-if="this.$store.state.isAdmin">
+    Admin USER STUFF HERE
 
-    <p align="center">
-      <strong>
-        Welcome {{ this.firstName }}
-        <br />
-        <br />
-        You are currently logged in as a
-        {{ this.userType }} <br />
-      </strong>
-      <br />
-    </p>
+    <v-container class="grey lighten-5" fill-height fluid>
+      <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
+        <p>
+          <strong>
+            Welcome {{ this.firstName }}
+            <br />
+            <br />
+            You are currently logged in as a
+            {{ this.userType }} User <br />
+            <br />
+            To Get a History of All previous requests please click below.
+          </strong>
+          <br />
+        </p>
+
+        <v-btn @click="adminGetHistory">
+          Get History
+        </v-btn>
+        <br /><br />
+
+        <v-btn @click="clear">
+          Clear
+        </v-btn>
+
+        <!-- Get Open Reimbursements -->
+        <p v-if="getReimbursementMessage" align="center" style="color:green">
+          <strong>{{ getReimbursementMessage }}</strong>
+          <v-data-table
+            :headers="currentHeaders"
+            :items="current"
+            :items-per-page="10"
+            class="elevation-1"
+          >
+          </v-data-table>
+          <!-- Get Open Reimbursements -->
+        </p>
+      </v-card>
+    </v-container>
   </div>
 
   <!-- Regular User Stuff -->
@@ -77,17 +105,16 @@ export default {
       },
     })
       .then(async (response) => {
-          this.userId = response.data.id;
-          store.commit("setUserId", this.userId);
-          this.firstName = response.data.firstName;
-          if (response.data.userType == "R") {
-            this.userType = "Regular";
-          } else if (response.data.userType == "A") {
-            this.userType = "Admin";
-            store.commit("makeUserAdmin");
-          }
+        this.userId = response.data.id;
+        store.commit("setUserId", this.userId);
+        this.firstName = response.data.firstName;
+        if (response.data.userType == "R") {
+          this.userType = "Regular";
+        } else if (response.data.userType == "A") {
+          this.userType = "Admin";
+          store.commit("makeUserAdmin");
         }
-      )
+      })
       .catch((error) => {
         console.log(error.response);
         this.$router.push("/");
@@ -138,6 +165,30 @@ export default {
       axios({
         method: "post",
         url: "http://localhost:8000/api/getHistory",
+        withCredentials: true,
+      })
+        .then(async (response) => {
+          for (var x of response.data) {
+            x.amount = "$" + x.amount;
+
+            this.current.push(x);
+          }
+          console.log(response);
+
+          this.getReimbursementMessage =
+            "You successfully loaded your completed requests.";
+        })
+        .catch((error) => {
+          console.log(error.response);
+          this.errorMessage = error.response;
+          this.successMessage = "";
+        });
+    },
+        adminGetHistory() {
+      this.current = [];
+      axios({
+        method: "post",
+        url: "http://localhost:8000/api/getAllHistory",
         withCredentials: true,
       })
         .then(async (response) => {

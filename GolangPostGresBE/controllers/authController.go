@@ -353,7 +353,6 @@ func ApproveOrDeny(c *fiber.Ctx) error {
 		return err
 	}
 
-	// requestId,err := strconv.Atoi(data["requestId"])
 	requestId, err := strconv.ParseUint(data["requestId"], 10, 32)
 	if err != nil {
 		fmt.Println(err)
@@ -363,13 +362,39 @@ func ApproveOrDeny(c *fiber.Ctx) error {
 	reimbursment := models.Reimbursment{
 
 		RequestId:      rID,
-		ApprovedStatus: "", // need date from fe hre should be data["approveOrDeny"]
-		DateApproved:   "", //Need todays date here.
+		ApprovedStatus: data["approveOrDeny"],
+		DateApproved:   time.Now().String(),
 		ApprovedBy:     claims.Issuer,
+		UserID:         "",
+		Title:          "",
+		Description:    "",
+		Amount:         "",
 	}
 
-	database.DB.Create(&reimbursment)
+	fmt.Println(reimbursment)
+	database.DB.Model(&models.Reimbursment{}).Where("request_id = ?", rID).Update("approved_status", data["approveOrDeny"]).Update("approved_by", claims.Issuer).Update("date_approved", time.Now().String()).Find(&reimbursment)
 
+	return c.JSON(reimbursment)
+
+}
+func GetAllHistory(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "Unauthenticated User",
+		})
+	}
+	claims := token.Claims.(*jwt.StandardClaims)
+	var reimbursment []models.Reimbursment
+	if claims != nil {
+		database.DB.Where(map[string]interface{}{"approved_status": "A"}).Or(map[string]interface{}{"approved_status": "D"}).Find(&reimbursment)
+	}
 	return c.JSON(reimbursment)
 
 }
