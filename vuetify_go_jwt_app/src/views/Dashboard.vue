@@ -1,6 +1,6 @@
 <template>
   <!-- BEGIN ADMIN STUFF -->
-  <div text-align: center v-if="this.$store.state.isAdmin">
+  <div style="text-align: center" v-if="this.$store.state.isAdmin">
     ADMIN STUFF HERE
 
     <v-container class="grey lighten-5" fill-height fluid>
@@ -66,7 +66,7 @@
   <!-- End ADMIN STUFF -->
 
   <!-- Regular User Stuff -->
-  <div text-align: center v-else-if="!this.$store.state.isAdmin">
+  <div style="text-align: center" v-else-if="!this.$store.state.isAdmin">
     REGULAR USER STUFF HERE
 
     <v-container class="grey lighten-5" fill-height fluid>
@@ -189,10 +189,9 @@ import Axios from "axios";
 import axios from "axios";
 
 import store from "..//store/index";
-import { required, digits, regex, numeric} from "vee-validate/dist/rules";
+import { required, digits, max, regex, min, numeric} from "vee-validate/dist/rules";
 import {
   extend,
-  validate,
   ValidationObserver,
   ValidationProvider,
   setInteractionMode,
@@ -210,18 +209,21 @@ extend("required", {
   message: "{_field_} can not be empty",
 });
 
+extend("max", {
+  ...max,
+  message: "{_field_} may not be greater than {length} characters",
+});
+
 extend("regex", {
   ...regex,
   message: "{_field_} {_value_} does not match {regex}",
 });
 
+extend("min", min);
+extend("max", max);
 extend("numeric", numeric);
 
 extend("digits_between", {
-  async validate(value, { min, max }) {
-    const res = await validate(value, `numeric|min:${min}|max:${max}`);
-    return res.valid;
-  },
   params: ["min", "max"],
   message: "The {_field_} must be between {min} and {max} digits",
 });
