@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"strconv"
 	"time"
 
@@ -346,22 +345,33 @@ func ApproveOrDeny(c *fiber.Ctx) error {
 		})
 	}
 	claims := token.Claims.(*jwt.StandardClaims)
+	user := models.User{
+		UserType: "",
+	}
+	database.DB.Model(&models.User{}).Where("id = ?", claims.Issuer).Find(&user)
 
+	if user.UserType == "R" {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"message": "User is NOT an ADMIN.",
+		})
+	}
 	var data map[string]string
 	c.BodyParser(&data)
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
 
-	requestId, err := strconv.ParseUint(data["requestId"], 10, 32)
-	if err != nil {
-		fmt.Println(err)
+	if data["approveOrDeny"] != "D" && data["approveOrDeny"] != "A" {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"message": "Approve or Deny can only be D or A.",
+		})
 	}
-	rID := uint(requestId)
 
 	reimbursment := models.Reimbursment{
 
-		RequestId:      rID,
+		RequestId:      0,
 		ApprovedStatus: data["approveOrDeny"],
 		DateApproved:   time.Now().String(),
 		ApprovedBy:     claims.Issuer,
@@ -371,8 +381,20 @@ func ApproveOrDeny(c *fiber.Ctx) error {
 		Amount:         "",
 	}
 
-	fmt.Println(reimbursment)
-	database.DB.Model(&models.Reimbursment{}).Where("request_id = ?", rID).Update("approved_status", data["approveOrDeny"]).Update("approved_by", claims.Issuer).Update("date_approved", time.Now().String()).Find(&reimbursment)
+	database.DB.Model(&models.Reimbursment{}).Where("request_id = ?", data["requestId"]).Find(&reimbursment)
+	if reimbursment.RequestId == 0 {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"message": "Request ID does not exsist.",
+		})
+	}
+	if reimbursment.ApprovedStatus == "A" || reimbursment.ApprovedStatus == "D" {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"message": "Request has allready been approved or denied.",
+		})
+	}
+	database.DB.Model(&models.Reimbursment{}).Where("request_id = ?", data["requestId"]).Update("approved_status", data["approveOrDeny"]).Update("approved_by", claims.Issuer).Update("date_approved", time.Now().String()).Find(&reimbursment)
 
 	return c.JSON(reimbursment)
 
@@ -392,6 +414,7 @@ func GetAllHistory(c *fiber.Ctx) error {
 	}
 	claims := token.Claims.(*jwt.StandardClaims)
 	var reimbursment []models.Reimbursment
+
 	if claims != nil {
 		database.DB.Where(map[string]interface{}{"approved_status": "A"}).Or(map[string]interface{}{"approved_status": "D"}).Find(&reimbursment)
 	}

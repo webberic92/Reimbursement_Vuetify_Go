@@ -60,9 +60,7 @@ export default {
         .then(async (response) => {
           if (!response.ok) {
             store.commit("logUserOut");
-
-            console.log(response.data);
-            this.$router.push("/");
+                        this.$router.push("/");
           }
         })
         .catch((error) => {
