@@ -2,16 +2,16 @@
   <v-container class="grey lighten-5" fill-height fluid>
     <v-card class="pa-md-4 mx-lg-auto" color="white" width="600px">
       <!-- Messages -->
-      <p v-if="errorMessage" align="center" style="color:red">
-        <strong>
+      <p v-if="errorMessage" style="text-align: center">
+        <strong style="color:red">
           {{ errorMessage }}
         </strong>
       </p>
-      <p v-if="successMessage" align="center" style="color:green">
-        <strong>{{ successMessage }}</strong>
+      <p v-if="successMessage" style="text-align: center">
+        <strong style="color:green">{{ successMessage }}</strong>
       </p>
 
-      <p v-if="routingMessage" align="center">
+      <p v-if="routingMessage" style="text-align: center">
         <strong> {{ routingMessage }} </strong>
       </p>
       <v-row>
@@ -72,7 +72,7 @@ import {
   setInteractionMode,
 } from "vee-validate";
 import axios from "axios";
-import store from "..//store/index"
+import store from "..//store/index";
 
 setInteractionMode("eager");
 
@@ -116,9 +116,8 @@ export default {
             this.errorMessage = "";
             this.successMessage = response.data.message;
             this.routingMessage = "Now routing you to Dashboard page";
-          
-            
-            store.commit('logUserIn')
+
+            store.commit("logUserIn");
 
             setTimeout(() => {
               this.$router.push("/dashboard");

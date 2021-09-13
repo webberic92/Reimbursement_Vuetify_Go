@@ -1,18 +1,17 @@
 <template>
   <v-container class="grey lighten-5" fill-height fluid>
     <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
-     
       <!-- Messages -->
-      <p v-if="errorMessage" align="center" style="color:red">
-        <strong>
+      <p v-if="errorMessage" style="text-align: center" >
+        <strong style="color:red">
           {{ errorMessage }}
         </strong>
       </p>
-      <p v-if="successMessage" align="center" style="color:green">
-        <strong>{{ successMessage }}</strong>
+      <p v-if="successMessage" style="text-align: center">
+        <strong style="color:green">{{ successMessage }}</strong>
       </p>
 
-      <p v-if="routingMessage" align="center">
+      <p v-if="routingMessage" style="text-align: center">
         <strong> {{ routingMessage }} </strong>
       </p>
       <v-row>
@@ -156,9 +155,7 @@ import {
   setInteractionMode,
 } from "vee-validate";
 import axios from "axios";
-// import {useRouter} from "vue-router";
 
-// const router = useRouter();
 setInteractionMode("eager");
 
 extend("digits", {
@@ -185,8 +182,6 @@ extend("email", {
   ...email,
   message: "Email must be valid",
 });
-
-// const successMessage = ref('');
 
 export default {
   components: {
@@ -220,26 +215,21 @@ export default {
       if (this.form.userType == "Administrator User") {
         this.form.userType = "A";
       }
-      console.log("submit button hit");
-      console.log(JSON.stringify(this.form));
       axios({
         method: "post",
         url: "http://localhost:8000/api/register",
         data: this.form,
       })
         .then(async (response) => {
-          if (!response.ok) {
-            console.log(response.data.message);
             this.errorMessage = "";
             this.successMessage = response.data.message;
             this.routingMessage = "Now routing you to login page";
             setTimeout(() => {
               this.$router.push("/login");
             }, 7000);
-          }
+          
         })
         .catch((error) => {
-          console.log(error.response.data.message);
           this.errorMessage = error.response.data.message;
           this.successMessage = "";
         });

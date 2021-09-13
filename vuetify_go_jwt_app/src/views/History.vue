@@ -1,6 +1,6 @@
 <template>
   <!-- BEGIN ADMIN STUFF -->
-  <div align="center" v-if="this.$store.state.isAdmin">
+  <div style="text-align: center" v-if="this.$store.state.isAdmin">
     Admin USER STUFF HERE
 
     <v-container class="grey lighten-5" fill-height fluid>
@@ -28,8 +28,8 @@
         </v-btn>
 
         <!-- Get Open Reimbursements -->
-        <p v-if="getReimbursementMessage" align="center" style="color:green">
-          <strong>{{ getReimbursementMessage }}</strong>
+        <p v-if="getReimbursementMessage" style="text-align: center">
+          <strong style="color:green">{{ getReimbursementMessage }}</strong>
           <v-data-table
             :headers="currentHeaders"
             :items="current"
@@ -44,7 +44,7 @@
   </div>
 
   <!-- Regular User Stuff -->
-  <div align="center" v-else-if="!this.$store.state.isAdmin">
+  <div style="text-align: center" v-else-if="!this.$store.state.isAdmin">
     REGULAR USER STUFF HERE
 
     <v-container class="grey lighten-5" fill-height fluid>
@@ -72,8 +72,8 @@
         </v-btn>
 
         <!-- Get Open Reimbursements -->
-        <p v-if="getReimbursementMessage" align="center" style="color:green">
-          <strong>{{ getReimbursementMessage }}</strong>
+        <p v-if="getReimbursementMessage" style="text-align: center" >
+          <strong style="color:green">{{ getReimbursementMessage }}</strong>
           <v-data-table
             :headers="currentHeaders"
             :items="current"
@@ -157,7 +157,6 @@ export default {
   },
   methods: {
     clear() {
-      console.log("clear clicked");
       this.getReimbursementMessage = "";
     },
     getHistory() {
@@ -173,8 +172,6 @@ export default {
 
             this.current.push(x);
           }
-          console.log(response);
-
           this.getReimbursementMessage =
             "You successfully loaded your completed requests.";
         })
@@ -194,16 +191,13 @@ export default {
         .then(async (response) => {
           for (var x of response.data) {
             x.amount = "$" + x.amount;
-
             this.current.push(x);
           }
-          console.log(response);
 
           this.getReimbursementMessage =
             "You successfully loaded your completed requests.";
         })
         .catch((error) => {
-          console.log(error.response);
           this.errorMessage = error.response;
           this.successMessage = "";
         });
