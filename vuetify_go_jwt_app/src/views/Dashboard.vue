@@ -1,11 +1,11 @@
 <template>
   <!-- BEGIN ADMIN STUFF -->
-  <div align="center" v-if="this.$store.state.isAdmin">
+  <div text-align: center v-if="this.$store.state.isAdmin">
     ADMIN STUFF HERE
 
     <v-container class="grey lighten-5" fill-height fluid>
       <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
-        <p align="center">
+        <p text-align: center>
           <strong>
             Welcome {{ this.firstName }}
             <br />
@@ -15,11 +15,11 @@
           </strong>
           <br />
         </p>
-        <p v-if="ApproveOrDenyMessage" align="center" style="color:green">
+        <p v-if="ApproveOrDenyMessage" text-align: center style="color:green">
           <strong>{{ ApproveOrDenyMessage }}</strong>
         </p>
         <!-- Get Open Reimbursements -->
-        <p v-if="loadOfOpenRequest" align="center" style="color:green">
+        <p v-if="loadOfOpenRequest" text-align: center style="color:green">
 
 
 
@@ -66,7 +66,7 @@
   <!-- End ADMIN STUFF -->
 
   <!-- Regular User Stuff -->
-  <div align="center" v-else-if="!this.$store.state.isAdmin">
+  <div text-align: center v-else-if="!this.$store.state.isAdmin">
     REGULAR USER STUFF HERE
 
     <v-container class="grey lighten-5" fill-height fluid>
@@ -147,14 +147,14 @@
         <br />
         <br />
         <!-- Messages -->
-        <p v-if="errorMessage" align="center" style="color:red">
+        <p v-if="errorMessage" text-align: center style="color:red">
           <strong>
             {{ errorMessage }}
           </strong>
         </p>
         <!-- New Reimbursment created table -->
 
-        <p v-if="createReimbursmentMessage" align="center" style="color:green">
+        <p v-if="createReimbursmentMessage" text-align: center style="color:green">
           <strong>{{ createReimbursmentMessage }}</strong>
           <v-data-table
             v-if="this.submitted[0].rId != null"
@@ -168,7 +168,7 @@
         <br />
 
         <!-- Get Open Reimbursements -->
-        <p v-if="getReimbursementMessage" align="center" style="color:green">
+        <p v-if="getReimbursementMessage" text-align: center style="color:green">
           <strong>{{ getReimbursementMessage }}</strong>
           <v-data-table
             :headers="currentHeaders"
@@ -189,14 +189,14 @@ import Axios from "axios";
 import axios from "axios";
 
 import store from "..//store/index";
-import { required, digits, max, regex } from "vee-validate/dist/rules";
+import { required, digits,  regex } from "vee-validate/dist/rules";
 import {
   extend,
   ValidationObserver,
   ValidationProvider,
   setInteractionMode,
 } from "vee-validate";
-import { min, numeric } from "vee-validate/dist/rules";
+import {  numeric } from "vee-validate/dist/rules";
 import { validate } from "vee-validate";
 
 setInteractionMode("eager");
@@ -211,18 +211,12 @@ extend("required", {
   message: "{_field_} can not be empty",
 });
 
-extend("max", {
-  ...max,
-  message: "{_field_} may not be greater than {length} characters",
-});
-
 extend("regex", {
   ...regex,
   message: "{_field_} {_value_} does not match {regex}",
 });
 
-extend("min", min);
-extend("max", max);
+
 extend("numeric", numeric);
 
 extend("digits_between", {
@@ -280,6 +274,7 @@ export default {
       createReimbursmentMessage: "",
       ApproveOrDenyMessage: "",
       loadOfOpenRequest: false,
+      getReimbursementMessage: "",
       submittedHeaders: [
         {
           text: "Reimbursment ID",

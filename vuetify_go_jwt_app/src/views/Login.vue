@@ -126,7 +126,7 @@ export default {
           }
         })
         .catch((error) => {
-          console.log(error.response);
+          console.log(error);
           this.errorMessage = error.response.data.message;
           this.successMessage = "";
         });
