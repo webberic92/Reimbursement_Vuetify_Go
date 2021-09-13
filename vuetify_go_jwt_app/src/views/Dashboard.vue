@@ -189,15 +189,14 @@ import Axios from "axios";
 import axios from "axios";
 
 import store from "..//store/index";
-import { required, digits,  regex } from "vee-validate/dist/rules";
+import { required, digits, regex, numeric} from "vee-validate/dist/rules";
 import {
   extend,
+  validate,
   ValidationObserver,
   ValidationProvider,
   setInteractionMode,
 } from "vee-validate";
-import {  numeric } from "vee-validate/dist/rules";
-import { validate } from "vee-validate";
 
 setInteractionMode("eager");
 
@@ -215,7 +214,6 @@ extend("regex", {
   ...regex,
   message: "{_field_} {_value_} does not match {regex}",
 });
-
 
 extend("numeric", numeric);
 
