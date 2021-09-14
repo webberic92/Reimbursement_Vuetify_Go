@@ -192,6 +192,7 @@ import store from "..//store/index";
 import { required, digits, max, regex, min, numeric} from "vee-validate/dist/rules";
 import {
   extend,
+  validate,
   ValidationObserver,
   ValidationProvider,
   setInteractionMode,
@@ -224,6 +225,10 @@ extend("max", max);
 extend("numeric", numeric);
 
 extend("digits_between", {
+  async validate(value, { min, max }) {
+    const res = await validate(value, `numeric|min:${min}|max:${max}`);
+    return res.valid;
+  },
   params: ["min", "max"],
   message: "The {_field_} must be between {min} and {max} digits",
 });
