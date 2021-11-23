@@ -9,58 +9,54 @@ import History from "../views/History"
 
 Vue.use(VueRouter)
 
-
-function useMustBeLoggedIn(to, from, next)
-{
-  if(store.state.isLoggedIn){
+function useMustBeLoggedIn(to, from, next) {
+  if (store.state.isLoggedIn) {
     next(); // allow to enter route
-   } 
-   else
-   {
-    next('/'); // go to '/';
-   }
   }
+  else {
+    next('/'); // go to '/';
+  }
+}
 
-function useAlreadyLoggedIn(to, from, next)
-{
-  if(!store.state.isLoggedIn){
+function useAlreadyLoggedIn(to, from, next) {
+  if (!store.state.isLoggedIn) {
 
     next();
-   }
   }
+}
 
 const routes = [
   {
     path: '/',
     name: 'Home',
     component: Home,
-    beforeEnter : useAlreadyLoggedIn,
+    beforeEnter: useAlreadyLoggedIn,
 
   },
   {
     path: '/login',
     name: 'Login',
     component: Login,
-    beforeEnter : useAlreadyLoggedIn
+    beforeEnter: useAlreadyLoggedIn
   },
   {
     path: '/register',
     name: 'Register',
     component: Register,
-    beforeEnter : useAlreadyLoggedIn,
+    beforeEnter: useAlreadyLoggedIn,
 
   },
   {
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
-    beforeEnter : useMustBeLoggedIn,
+    beforeEnter: useMustBeLoggedIn,
   },
   {
     path: '/history',
     name: 'History',
     component: History,
-    beforeEnter : useMustBeLoggedIn,
+    beforeEnter: useMustBeLoggedIn,
   }
 ]
 
@@ -71,7 +67,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  if(to.matched.some(record => record.meta.requiresAuth)) {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
     if (store.getters.isLoggedIn) {
       next()
       return

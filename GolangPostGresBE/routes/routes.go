@@ -8,14 +8,14 @@ import (
 func SetUp(app *fiber.App) {
 
 	app.Post("/api/register", controllers.Register)
-	app.Post("/api/login", controllers.Login)
+	app.Put("/api/login", controllers.Login)
 	app.Get("/api/user", controllers.User)
-	app.Post("/api/logout", controllers.Logout)
-	app.Post("/api/getReimbursments", controllers.GetReimbursments)
+	app.Get("/api/logout", controllers.Logout)
+	app.Get("/api/getReimbursments", controllers.GetReimbursments)
 	app.Post("/api/createReimbursment", controllers.CreateReimbursment)
-	app.Post("/api/getHistory", controllers.GetHistory)
-	app.Post("/api/getAllOpenReimbursments", controllers.GetAllOpenReimbursments)
-	app.Post("/api/approveOrDeny", controllers.ApproveOrDeny)
-	app.Post("/api/getAllHistory", controllers.GetAllHistory)
+	app.Get("/api/getHistory", controllers.GetHistory)
+	app.Get("/api/getAllOpenReimbursments", controllers.GetAllOpenReimbursments)
+	app.Put("/api/approveOrDeny", controllers.ApproveOrDeny)
+	app.Get("/api/getAllHistory", controllers.GetAllHistory)
 
 }

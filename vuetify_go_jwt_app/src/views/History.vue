@@ -18,18 +18,14 @@
           <br />
         </p>
 
-        <v-btn @click="adminGetHistory">
-          Get History
-        </v-btn>
+        <v-btn @click="adminGetHistory"> Get History </v-btn>
         <br /><br />
 
-        <v-btn @click="clear">
-          Clear
-        </v-btn>
+        <v-btn @click="clear"> Clear </v-btn>
 
         <!-- Get Open Reimbursements -->
         <p v-if="getReimbursementMessage" style="text-align: center">
-          <strong style="color:green">{{ getReimbursementMessage }}</strong>
+          <strong style="color: green">{{ getReimbursementMessage }}</strong>
           <v-data-table
             :headers="currentHeaders"
             :items="current"
@@ -62,18 +58,14 @@
           <br />
         </p>
 
-        <v-btn @click="getHistory">
-          Get History
-        </v-btn>
+        <v-btn @click="getHistory"> Get History </v-btn>
         <br /><br />
 
-        <v-btn @click="clear">
-          Clear
-        </v-btn>
+        <v-btn @click="clear"> Clear </v-btn>
 
         <!-- Get Open Reimbursements -->
-        <p v-if="getReimbursementMessage" style="text-align: center" >
-          <strong style="color:green">{{ getReimbursementMessage }}</strong>
+        <p v-if="getReimbursementMessage" style="text-align: center">
+          <strong style="color: green">{{ getReimbursementMessage }}</strong>
           <v-data-table
             :headers="currentHeaders"
             :items="current"
@@ -162,7 +154,7 @@ export default {
     getHistory() {
       this.current = [];
       axios({
-        method: "post",
+        method: "get",
         url: "http://localhost:8000/api/getHistory",
         withCredentials: true,
       })
@@ -181,10 +173,10 @@ export default {
           this.successMessage = "";
         });
     },
-        adminGetHistory() {
+    adminGetHistory() {
       this.current = [];
       axios({
-        method: "post",
+        method: "get",
         url: "http://localhost:8000/api/getAllHistory",
         withCredentials: true,
       })

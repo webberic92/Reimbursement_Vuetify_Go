@@ -114,67 +114,61 @@ func Register(c *fiber.Ctx) error {
 
 func Login(c *fiber.Ctx) error {
 	var data map[string]string
-
+	//Verifies body is not blank.
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
+	//Get users with parsed email from database 
 	var user models.User
 	database.DB.Where("email = ?", data["email"]).First(&user)
-
+	//Backend validation
 	if data["email"] == "" {
 		c.Status(fiber.StatusBadRequest)
-
 		return c.JSON(fiber.Map{
 			"message": "Email can not be blank",
 		})
 	}
-
+	//Backend validation
 	if data["password"] == "" {
 		c.Status(fiber.StatusBadRequest)
-
 		return c.JSON(fiber.Map{
 			"message": "password can not be blank",
 		})
 	}
-
+	//Backend validation
 	if user.Id == 0 {
-
 		c.Status(fiber.StatusNotFound)
 		return c.JSON(fiber.Map{
 			"message": "Email does not exist",
 		})
 	}
-
+	//Password validation
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
-
 			"message": "Wrong password",
 		})
-
 	}
-
+	//Creates JWT
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		Issuer:    strconv.Itoa(int(user.Id)),
 		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 	})
-
 	token, err := claims.SignedString([]byte(secretKey))
-
 	if err != nil {
-
 		c.Status(fiber.StatusInternalServerError)
 		return c.JSON(fiber.Map{
 			"message": "Could not login",
 		})
 	}
-
+	//Creates Cookie.
 	cookie := fiber.Cookie{
 		Name:     "jwt",
 		Value:    token,
 		Expires:  time.Now().Add(time.Hour * 24),
 		HTTPOnly: true,
 	}
+	//Returns Cookie with JWT and message string saying success.
 	c.Cookie(&cookie)
 	return c.JSON(fiber.Map{
 		"message": "success",

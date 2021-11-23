@@ -3,12 +3,12 @@
     <v-card class="pa-md-4 mx-lg-auto" color="white" width="600px">
       <!-- Messages -->
       <p v-if="errorMessage" style="text-align: center">
-        <strong style="color:red">
+        <strong style="color: red">
           {{ errorMessage }}
         </strong>
       </p>
       <p v-if="successMessage" style="text-align: center">
-        <strong style="color:green">{{ successMessage }}</strong>
+        <strong style="color: green">{{ successMessage }}</strong>
       </p>
 
       <p v-if="routingMessage" style="text-align: center">
@@ -51,12 +51,8 @@
             ></v-text-field>
           </validation-provider>
 
-          <v-btn class="mr-4" type="submit" :disabled="invalid">
-            submit
-          </v-btn>
-          <v-btn @click="clear">
-            clear
-          </v-btn>
+          <v-btn class="mr-4" type="submit" :disabled="invalid"> submit </v-btn>
+          <v-btn @click="clear"> clear </v-btn>
         </form>
       </validation-observer>
     </v-card>
@@ -108,7 +104,7 @@ export default {
     submit() {
       this.$refs.observer.validate();
       axios
-        .post("http://localhost:8000/api/login", this.form, {
+        .put("http://localhost:8000/api/login", this.form, {
           withCredentials: true,
         })
         .then(async (response) => {

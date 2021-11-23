@@ -1,8 +1,6 @@
 <template>
   <!-- BEGIN ADMIN STUFF -->
   <div style="text-align: center" v-if="this.$store.state.isAdmin">
-    ADMIN STUFF HERE
-
     <v-container class="grey lighten-5" fill-height fluid>
       <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
         <p text-align: center>
@@ -15,15 +13,11 @@
           </strong>
           <br />
         </p>
-        <p v-if="ApproveOrDenyMessage" text-align: center style="color:green">
+        <p v-if="ApproveOrDenyMessage" text-align: center style="color: green">
           <strong>{{ ApproveOrDenyMessage }}</strong>
         </p>
         <!-- Get Open Reimbursements -->
-        <p v-if="loadOfOpenRequest" text-align: center style="color:green">
-
-
-
-        
+        <p v-if="loadOfOpenRequest" text-align: center style="color: green">
           <v-data-table :headers="adminCurrentHeaders" :items="adminCurrent">
             <template v-slot:item="row">
               <tr>
@@ -52,14 +46,10 @@
         </p>
         <!-- Get Open Reimbursements -->
 
-        <v-btn @click="getAllOpenRequests">
-          Get All Open Requests.
-        </v-btn>
+        <v-btn @click="getAllOpenRequests"> Get All Open Requests. </v-btn>
         <br />
         <br />
-        <v-btn @click="clearAdmin">
-          Clear
-        </v-btn>
+        <v-btn @click="clearAdmin"> Clear </v-btn>
       </v-card>
     </v-container>
   </div>
@@ -67,8 +57,6 @@
 
   <!-- Regular User Stuff -->
   <div style="text-align: center" v-else-if="!this.$store.state.isAdmin">
-    REGULAR USER STUFF HERE
-
     <v-container class="grey lighten-5" fill-height fluid>
       <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
         <p>
@@ -135,26 +123,27 @@
             <v-btn class="mr-4" type="submit" :disabled="invalid">
               submit
             </v-btn>
-            <v-btn @click="clear">
-              clear
-            </v-btn>
+            <v-btn @click="clear"> clear </v-btn>
           </form>
         </validation-observer>
         <br />
-        <v-btn @click="getOpenRequests">
-          Get Current Requests.
-        </v-btn>
+        <v-btn @click="getOpenRequests"> Get Current Requests. </v-btn>
         <br />
         <br />
         <!-- Messages -->
-        <p v-if="errorMessage" text-align: center style="color:red">
+        <p v-if="errorMessage" text-align: center style="color: red">
           <strong>
             {{ errorMessage }}
           </strong>
         </p>
         <!-- New Reimbursment created table -->
 
-        <p v-if="createReimbursmentMessage" text-align: center style="color:green">
+        <p
+          v-if="createReimbursmentMessage"
+          text-align:
+          center
+          style="color: green"
+        >
           <strong>{{ createReimbursmentMessage }}</strong>
           <v-data-table
             v-if="this.submitted[0].rId != null"
@@ -168,7 +157,12 @@
         <br />
 
         <!-- Get Open Reimbursements -->
-        <p v-if="getReimbursementMessage" text-align: center style="color:green">
+        <p
+          v-if="getReimbursementMessage"
+          text-align:
+          center
+          style="color: green"
+        >
           <strong>{{ getReimbursementMessage }}</strong>
           <v-data-table
             :headers="currentHeaders"
@@ -189,7 +183,14 @@ import Axios from "axios";
 import axios from "axios";
 
 import store from "..//store/index";
-import { required, digits, max, regex, min, numeric} from "vee-validate/dist/rules";
+import {
+  required,
+  digits,
+  max,
+  regex,
+  min,
+  numeric,
+} from "vee-validate/dist/rules";
 import {
   extend,
   validate,
@@ -394,7 +395,7 @@ export default {
     getOpenRequests() {
       this.current = [];
       axios({
-        method: "post",
+        method: "get",
         url: "http://localhost:8000/api/getReimbursments",
         withCredentials: true,
       })
@@ -417,7 +418,7 @@ export default {
     getAllOpenRequests() {
       this.adminCurrent = [];
       axios({
-        method: "post",
+        method: "get",
         url: "http://localhost:8000/api/getAllOpenReimbursments",
         withCredentials: true,
       })
@@ -427,7 +428,7 @@ export default {
 
             this.adminCurrent.push(x);
           }
-          this.loadOfOpenRequest = true
+          this.loadOfOpenRequest = true;
         })
         .catch((error) => {
           console.log(error.response);
@@ -436,7 +437,7 @@ export default {
     },
     approveOrDeny(approveOrDeny, requestId) {
       axios({
-        method: "post",
+        method: "put",
         url: "http://localhost:8000/api/approveOrDeny",
         withCredentials: true,
         data: {
@@ -447,18 +448,19 @@ export default {
         .then(async (response) => {
           if (response.data.approvalStatus == "A") {
             this.ApproveOrDenyMessage =
-              "You successfully approved Reimbursment Requests #" + response.data.RequestId;
+              "You successfully approved Reimbursment Requests #" +
+              response.data.RequestId;
           } else {
             this.ApproveOrDenyMessage =
-              "You successfully denied Reimbursment Requests #" + response.data.RequestId;
+              "You successfully denied Reimbursment Requests #" +
+              response.data.RequestId;
           }
-         this.getAllOpenRequests()
+          this.getAllOpenRequests();
         })
         .catch((error) => {
           console.log(error);
           this.ApproveOrDenyMessage = error;
         });
-        
     },
   },
 };
