@@ -309,7 +309,6 @@ export default {
           sortable: false,
           value: "RequestId",
         },
-        { text: "Requestor", value: "userID" },
         { text: "Title", value: "title" },
         { text: "Description", value: "description" },
         { text: "Amount", value: "amount" },

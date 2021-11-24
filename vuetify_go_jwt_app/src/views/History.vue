@@ -126,7 +126,6 @@ export default {
           sortable: false,
           value: "RequestId",
         },
-        { text: "Requestor", value: "userID" },
         { text: "Title", value: "title" },
         { text: "Description", value: "description" },
         { text: "Amount", value: "amount" },
@@ -136,7 +135,6 @@ export default {
       ],
       current: [
         {
-          RequestId: null,
           userID: null,
           title: "",
           description: "",
