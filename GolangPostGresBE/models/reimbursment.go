@@ -1,12 +1,12 @@
 package models
 
 type Reimbursment struct {
-	RequestId      uint   `gorm:"primaryKey"`
-	UserID         string `json:"userID"`
+	RequestId      uint64 `gorm:"primaryKey"`
+	UserID         uint64 `gorm:"foreignKey:User;references:Id;" json:"userID"`
 	Title          string `json:"title"`
 	Description    string `json:"description"`
 	Amount         string `json:"amount"`
 	ApprovedStatus string `json:"approvalStatus"`
 	DateApproved   string `json:"dateApproved"`
-	ApprovedBy     string `json:"approvedBy"`
+	ApprovedBy     uint64 `gorm:"foreignKey:User;references:Id;" json:"approved_by"`
 }

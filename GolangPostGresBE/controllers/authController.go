@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"strconv"
 	"time"
 
@@ -118,7 +119,7 @@ func Login(c *fiber.Ctx) error {
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
-	//Get users with parsed email from database 
+	//Get users with parsed email from database
 	var user models.User
 	database.DB.Where("email = ?", data["email"]).First(&user)
 	//Backend validation
@@ -175,6 +176,35 @@ func Login(c *fiber.Ctx) error {
 	})
 }
 
+func GetUserById(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+
+	_, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "Unauthenticated User",
+		})
+	}
+	var user models.User
+	id := string(c.Params("id"))
+	fmt.Print((id))
+
+	database.DB.Where(id).First(&user)
+	if user.Id > 0 {
+		return c.JSON(user)
+
+	} else {
+		c.Status(fiber.StatusBadRequest)
+		return c.JSON(fiber.Map{
+			"message": "User Does Not Exist",
+		})
+	}
+
+}
 func User(c *fiber.Ctx) error {
 	cookie := c.Cookies("jwt")
 
@@ -242,16 +272,19 @@ func CreateReimbursment(c *fiber.Ctx) error {
 	if err := c.BodyParser(&data); err != nil {
 		return err
 	}
+	//  issuerId := string(claims.Issuer)
+	issuerId, err := strconv.ParseUint(claims.Issuer, 10, 64)
+	if err != nil {
+		return c.JSON(err)
 
+	}
 	reimbursment := models.Reimbursment{
 
-		UserID:         claims.Issuer,
-		Title:          data["title"],
-		Description:    data["description"],
-		Amount:         data["amount"],
-		ApprovedStatus: "",
-		DateApproved:   "",
-		ApprovedBy:     "",
+		UserID:       issuerId,
+		Title:        data["title"],
+		Description:  data["description"],
+		Amount:       data["amount"],
+		DateApproved: "",
 	}
 
 	database.DB.Create(&reimbursment)
@@ -294,11 +327,18 @@ func GetHistory(c *fiber.Ctx) error {
 			"message": "Unauthenticated User",
 		})
 	}
-	claims := token.Claims.(*jwt.StandardClaims)
-	var reimbursment []models.Reimbursment
 
-	database.DB.Where(map[string]interface{}{"user_id": claims.Issuer, "approved_status": "A"}).Or(map[string]interface{}{"user_id": claims.Issuer, "approved_status": "D"}).Find(&reimbursment)
-	return c.JSON(reimbursment)
+	cols := []map[string]interface{}{}
+	claims := token.Claims.(*jwt.StandardClaims)
+	if claims != nil {
+		fmt.Printf(claims.Issuer)
+		err = database.DB.Raw("SELECT request_id, user_id, title, description, amount, approved_status, date_approved, approved_by,concat(submitter.last_name ,', ', submitter.first_name ) as submitter , concat(approver.last_name,', ',approver.first_name) as approver FROM public.reimbursments as reimbursment INNER JOIN users as approver ON approver.id = reimbursment.approved_by INNER JOIN users as submitter ON submitter.id = reimbursment.user_id where reimbursment.user_id = " + claims.Issuer).Find(&cols).Error
+		if err != nil {
+			fmt.Print(err)
+		}
+	}
+
+	return c.JSON(&cols)
 
 }
 
@@ -316,12 +356,15 @@ func GetAllOpenReimbursments(c *fiber.Ctx) error {
 		})
 	}
 	claims := token.Claims.(*jwt.StandardClaims)
-	var reimbursment []models.Reimbursment
+	cols := []map[string]interface{}{}
 
 	if claims != nil {
-		database.DB.Where(map[string]interface{}{"approved_status": ""}).Find(&reimbursment)
+		err = database.DB.Raw(" SELECT request_id, user_id, title, description, amount,concat(submitter.last_name ,', ', submitter.first_name ) as submitter FROM public.reimbursments as reimbursment INNER JOIN users as submitter ON submitter.id = reimbursment.user_id where approved_status = ''").Find(&cols).Error
+		if err != nil {
+			return c.JSON(err)
+		}
 	}
-	return c.JSON(reimbursment)
+	return c.JSON(&cols)
 }
 
 func ApproveOrDeny(c *fiber.Ctx) error {
@@ -362,14 +405,19 @@ func ApproveOrDeny(c *fiber.Ctx) error {
 			"message": "Approve or Deny can only be D or A.",
 		})
 	}
+	i, err := strconv.ParseUint(claims.Issuer, 10, 64)
+	if err != nil {
+		fmt.Printf("Cant parse to an Uint64: %T \n", i)
+	}
 
+	timeStamp := time.Now().Format("01-02-2006")
 	reimbursment := models.Reimbursment{
 
 		RequestId:      0,
 		ApprovedStatus: data["approveOrDeny"],
-		DateApproved:   time.Now().String(),
-		ApprovedBy:     claims.Issuer,
-		UserID:         "",
+		DateApproved:   timeStamp,
+		ApprovedBy:     i,
+		UserID:         0,
 		Title:          "",
 		Description:    "",
 		Amount:         "",
@@ -388,7 +436,7 @@ func ApproveOrDeny(c *fiber.Ctx) error {
 			"message": "Request has allready been approved or denied.",
 		})
 	}
-	database.DB.Model(&models.Reimbursment{}).Where("request_id = ?", data["requestId"]).Update("approved_status", data["approveOrDeny"]).Update("approved_by", claims.Issuer).Update("date_approved", time.Now().String()).Find(&reimbursment)
+	database.DB.Model(&models.Reimbursment{}).Where("request_id = ?", data["requestId"]).Update("approved_status", data["approveOrDeny"]).Update("approved_by", claims.Issuer).Update("date_approved", timeStamp).Find(&reimbursment)
 
 	return c.JSON(reimbursment)
 
@@ -407,11 +455,13 @@ func GetAllHistory(c *fiber.Ctx) error {
 		})
 	}
 	claims := token.Claims.(*jwt.StandardClaims)
-	var reimbursment []models.Reimbursment
+	cols := []map[string]interface{}{}
 
 	if claims != nil {
-		database.DB.Where(map[string]interface{}{"approved_status": "A"}).Or(map[string]interface{}{"approved_status": "D"}).Find(&reimbursment)
+		err = database.DB.Raw("SELECT request_id, user_id, title, description, amount, approved_status, date_approved,approved_by,concat(submitter.last_name ,', ', submitter.first_name ) as submitter, concat(approver.last_name,', ',approver.first_name) as approver FROM public.reimbursments as reimbursment INNER JOIN users as approver ON approver.id = reimbursment.approved_by INNER JOIN users as submitter ON submitter.id = reimbursment.user_id").Find(&cols).Error
+		if err != nil {
+			return c.JSON(err)
+		}
 	}
-	return c.JSON(reimbursment)
-
+	return c.JSON(&cols)
 }
