@@ -124,18 +124,28 @@ export default {
           text: "Reimbursment ID",
           align: "start",
           sortable: false,
-          value: "RequestId",
+          value: "request_id",
         },
+        { text: "Requestor ID", value: "user_id" },
+        { text: "Requestor Name", value: "submitter" },
+
         { text: "Title", value: "title" },
         { text: "Description", value: "description" },
         { text: "Amount", value: "amount" },
-        { text: "Reviewed By", value: "approvedBy" },
-        { text: "Date Reviewed", value: "dateApproved" },
-        { text: "Status", value: "approvalStatus" },
+        {
+          text: "Reviewer ID",
+          value: "approved_by",
+        },
+        {
+          text: "Reviewer Name",
+          value: "approver",
+        },
+        { text: "Date Reviewed", value: "date_approved" },
+        { text: "Status", value: "approved_status" },
       ],
       current: [
         {
-          userID: null,
+          RequestId: null,
           title: "",
           description: "",
           amount: null,

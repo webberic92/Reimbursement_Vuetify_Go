@@ -21,22 +21,23 @@
           <v-data-table :headers="adminCurrentHeaders" :items="adminCurrent">
             <template v-slot:item="row">
               <tr>
-                <td>{{ row.item.RequestId }}</td>
-                <td>{{ row.item.userID }}</td>
+                <td>{{ row.item.request_id }}</td>
+                <td>{{ row.item.user_id }}</td>
+                <td>{{ row.item.submitter }}</td>
                 <td>{{ row.item.title }}</td>
                 <td>{{ row.item.description }}</td>
                 <td>{{ row.item.amount }}</td>
                 <td>
                   <v-btn
                     color="success"
-                    @click="approveOrDeny('A', row.item.RequestId)"
+                    @click="approveOrDeny('A', row.item.request_id)"
                     >Approve</v-btn
                   >
                 </td>
                 <td>
                   <v-btn
                     color="error"
-                    @click="approveOrDeny('D', row.item.RequestId)"
+                    @click="approveOrDeny('D', row.item.request_id)"
                     >Deny</v-btn
                   >
                 </td>
@@ -296,7 +297,6 @@ export default {
       submitted: [
         {
           rId: null,
-          requestor: null,
           title: "",
           description: "",
           amount: null,
@@ -329,7 +329,9 @@ export default {
           sortable: false,
           value: "RequestId",
         },
-        { text: "Requestor", value: "userID" },
+        { text: "Requestor ID", value: "user_Id" },
+        { text: "Requestor Name", value: "submitter" },
+
         { text: "Title", value: "title" },
         { text: "Description", value: "description" },
         { text: "Amount", value: "amount" },
