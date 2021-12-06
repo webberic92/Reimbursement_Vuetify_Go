@@ -1,8 +1,6 @@
 <template>
   <!-- BEGIN ADMIN STUFF -->
   <div style="text-align: center" v-if="this.$store.state.isAdmin">
-    Admin USER STUFF HERE
-
     <v-container class="grey lighten-5" fill-height fluid>
       <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
         <p>
@@ -25,8 +23,10 @@
 
         <!-- Get Open Reimbursements -->
         <p v-if="getReimbursementMessage" style="text-align: center">
+          <br />
           <strong style="color: green">{{ getReimbursementMessage }}</strong>
           <v-data-table
+            v-if="showTable"
             :headers="currentHeaders"
             :items="current"
             :items-per-page="10"
@@ -41,8 +41,6 @@
 
   <!-- Regular User Stuff -->
   <div style="text-align: center" v-else-if="!this.$store.state.isAdmin">
-    REGULAR USER STUFF HERE
-
     <v-container class="grey lighten-5" fill-height fluid>
       <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
         <p>
@@ -67,6 +65,7 @@
         <p v-if="getReimbursementMessage" style="text-align: center">
           <strong style="color: green">{{ getReimbursementMessage }}</strong>
           <v-data-table
+            v-if="showTable"
             :headers="currentHeaders"
             :items="current"
             :items-per-page="10"
@@ -115,6 +114,7 @@ export default {
 
   data() {
     return {
+      showTable: false,
       firstName: "",
       userType: "",
       errorMessage: "",
@@ -167,13 +167,19 @@ export default {
         withCredentials: true,
       })
         .then(async (response) => {
-          for (var x of response.data) {
-            x.amount = "$" + x.amount;
+          if (response.data.length != 0) {
+            for (var x of response.data) {
+              x.amount = "$" + x.amount;
 
-            this.current.push(x);
+              this.current.push(x);
+            }
+            this.getReimbursementMessage =
+              "You successfully loaded your completed requests.";
+            this.showTable = true;
+          } else {
+            this.getReimbursementMessage = "No Current History for this User.";
+            this.showTable = false;
           }
-          this.getReimbursementMessage =
-            "You successfully loaded your completed requests.";
         })
         .catch((error) => {
           console.log(error.response);
@@ -189,13 +195,19 @@ export default {
         withCredentials: true,
       })
         .then(async (response) => {
-          for (var x of response.data) {
-            x.amount = "$" + x.amount;
-            this.current.push(x);
-          }
+          if (response.data.length != 0) {
+            for (var x of response.data) {
+              x.amount = "$" + x.amount;
+              this.current.push(x);
+            }
 
-          this.getReimbursementMessage =
-            "You successfully loaded your completed requests.";
+            this.getReimbursementMessage =
+              "You successfully loaded your completed requests.";
+            this.showTable = true;
+          } else {
+            this.getReimbursementMessage = "No completed requests available.";
+            this.showTable = false;
+          }
         })
         .catch((error) => {
           this.errorMessage = error.response;

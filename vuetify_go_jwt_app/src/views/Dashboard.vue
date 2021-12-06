@@ -8,7 +8,7 @@
             Welcome {{ this.firstName }}
             <br />
             <br />
-            You are currently logged in as a
+            You are currently logged in as an
             {{ this.userType }} <br />
           </strong>
           <br />
@@ -166,6 +166,7 @@
         >
           <strong>{{ getReimbursementMessage }}</strong>
           <v-data-table
+            v-if="this.loadOfOpenRequest"
             :headers="currentHeaders"
             :items="current"
             :items-per-page="10"
@@ -361,6 +362,7 @@ export default {
       this.errorMessage = "";
       document.getElementById("myForm").reset();
       this.getReimbursementMessage = "";
+      this.loadOfOpenRequest = false;
     },
     clearAdmin() {
       this.adminCurrent = [];
@@ -384,6 +386,8 @@ export default {
           this.submitted[0].amount = "$" + response.data.amount;
           this.createReimbursmentMessage =
             "You successfully created a new Reimbursment Request.";
+          this.loadOfOpenRequest = false;
+          this.getReimbursementMessage = "";
           document.getElementById("myForm").reset();
         })
 
@@ -394,21 +398,32 @@ export default {
         });
     },
     getOpenRequests() {
-      this.current = [];
       axios({
         method: "get",
         url: "http://localhost:8000/api/getReimbursments",
         withCredentials: true,
       })
         .then(async (response) => {
-          for (var x of response.data) {
-            x.amount = "$" + x.amount;
-
-            this.current.push(x);
-          }
+          console.log(response);
           this.createReimbursmentMessage = "";
-          this.getReimbursementMessage =
-            "You successfully loaded  all Reimbursment Requests.";
+
+          if (response.data.length != 0) {
+            this.current = [];
+            this.loadOfOpenRequest = true;
+            for (var x of response.data) {
+              x.amount = "$" + x.amount;
+              console.log("testttt");
+
+              this.current.push(x);
+            }
+            this.getReimbursementMessage =
+              "You successfully loaded  all Reimbursment Requests.";
+          } else {
+            this.loadOfOpenRequest = false;
+
+            this.getReimbursementMessage =
+              "Currently no open reimbursments for this user.";
+          }
         })
         .catch((error) => {
           console.log(error.response);
@@ -424,12 +439,18 @@ export default {
         withCredentials: true,
       })
         .then(async (response) => {
-          for (var x of response.data) {
-            x.amount = "$" + x.amount;
+          if (response.data.length != 0) {
+            for (var x of response.data) {
+              x.amount = "$" + x.amount;
 
-            this.adminCurrent.push(x);
+              this.adminCurrent.push(x);
+            }
+            this.loadOfOpenRequest = true;
+          } else {
+            this.ApproveOrDenyMessage =
+              "Currently no open reimbursments for any users.";
+            this.loadOfOpenRequest = false;
           }
-          this.loadOfOpenRequest = true;
         })
         .catch((error) => {
           console.log(error.response);

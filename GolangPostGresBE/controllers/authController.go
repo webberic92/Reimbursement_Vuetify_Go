@@ -107,7 +107,7 @@ func Register(c *fiber.Ctx) error {
 
 		c.Status(fiber.StatusBadRequest)
 		return c.JSON(fiber.Map{
-			"message": "User already exsists with that Email.",
+			"message": "User already exists with that Email.",
 		})
 	}
 

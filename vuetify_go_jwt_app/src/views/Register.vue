@@ -2,13 +2,13 @@
   <v-container class="grey lighten-5" fill-height fluid>
     <v-card class="pa-md-4 mx-lg-auto" color="white" width="auto">
       <!-- Messages -->
-      <p v-if="errorMessage" style="text-align: center" >
-        <strong style="color:red">
+      <p v-if="errorMessage" style="text-align: center">
+        <strong style="color: red">
           {{ errorMessage }}
         </strong>
       </p>
       <p v-if="successMessage" style="text-align: center">
-        <strong style="color:green">{{ successMessage }}</strong>
+        <strong style="color: green">{{ successMessage }}</strong>
       </p>
 
       <p v-if="routingMessage" style="text-align: center">
@@ -90,11 +90,12 @@
           <validation-provider
             v-slot="{ errors }"
             name="password"
-            rules="required"
+            rules="required|min:7"
           >
             <v-text-field
               type="password"
               v-model="form.password"
+              :counter="7"
               :error-messages="errors"
               label="Password"
               required
@@ -134,12 +135,8 @@
             ></v-checkbox>
           </validation-provider>
 
-          <v-btn class="mr-4" type="submit" :disabled="invalid">
-            submit
-          </v-btn>
-          <v-btn @click="clear">
-            clear
-          </v-btn>
+          <v-btn class="mr-4" type="submit" :disabled="invalid"> submit </v-btn>
+          <v-btn @click="clear"> clear </v-btn>
         </form>
       </validation-observer>
     </v-card>
@@ -147,7 +144,14 @@
 </template>
 
 <script>
-import { required, digits, email, max, regex } from "vee-validate/dist/rules";
+import {
+  required,
+  digits,
+  email,
+  max,
+  regex,
+  min,
+} from "vee-validate/dist/rules";
 import {
   extend,
   ValidationObserver,
@@ -171,6 +175,10 @@ extend("required", {
 extend("max", {
   ...max,
   message: "{_field_} may not be greater than {length} characters",
+});
+extend("min", {
+  ...min,
+  message: "{_field_} may not be lass than {length} characters",
 });
 
 extend("regex", {
@@ -221,13 +229,12 @@ export default {
         data: this.form,
       })
         .then(async (response) => {
-            this.errorMessage = "";
-            this.successMessage = response.data.message;
-            this.routingMessage = "Now routing you to login page";
-            setTimeout(() => {
-              this.$router.push("/login");
-            }, 7000);
-          
+          this.errorMessage = "";
+          this.successMessage = response.data.message;
+          this.routingMessage = "Now routing you to login page";
+          setTimeout(() => {
+            this.$router.push("/login");
+          }, 7000);
         })
         .catch((error) => {
           this.errorMessage = error.response.data.message;

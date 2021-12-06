@@ -40,7 +40,7 @@
           <validation-provider
             v-slot="{ errors }"
             name="password"
-            rules="required"
+            rules="required|min:7"
           >
             <v-text-field
               type="password"
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { required, email } from "vee-validate/dist/rules";
+import { required, email, min } from "vee-validate/dist/rules";
 import {
   extend,
   ValidationObserver,
@@ -80,6 +80,11 @@ extend("required", {
 extend("email", {
   ...email,
   message: "Email must be valid",
+});
+
+extend("min", {
+  ...min,
+  message: "{_field_} may not be lass than {length} characters",
 });
 
 export default {
