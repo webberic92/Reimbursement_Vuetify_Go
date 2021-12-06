@@ -177,18 +177,7 @@ func Login(c *fiber.Ctx) error {
 }
 
 func GetUserById(c *fiber.Ctx) error {
-	cookie := c.Cookies("jwt")
-
-	_, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
-	})
-
-	if err != nil {
-		c.Status(fiber.StatusUnauthorized)
-		return c.JSON(fiber.Map{
-			"message": "Unauthenticated User",
-		})
-	}
+	checkCookie(c)
 	var user models.User
 	id := string(c.Params("id"))
 	fmt.Print((id))
@@ -206,18 +195,9 @@ func GetUserById(c *fiber.Ctx) error {
 
 }
 func User(c *fiber.Ctx) error {
-	cookie := c.Cookies("jwt")
 
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
-	})
-
-	if err != nil {
-		c.Status(fiber.StatusUnauthorized)
-		return c.JSON(fiber.Map{
-			"message": "Unauthenticated User",
-		})
-	}
+	checkCookie(c)
+	token := getTokenFromCookie(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 	var user models.User
 
@@ -253,18 +233,8 @@ func Logout(c *fiber.Ctx) error {
 
 func CreateReimbursment(c *fiber.Ctx) error {
 
-	cookie := c.Cookies("jwt")
-
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
-	})
-
-	if err != nil {
-		c.Status(fiber.StatusUnauthorized)
-		return c.JSON(fiber.Map{
-			"message": "Unauthenticated User",
-		})
-	}
+	checkCookie(c)
+	token := getTokenFromCookie(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var data map[string]string
@@ -294,18 +264,8 @@ func CreateReimbursment(c *fiber.Ctx) error {
 }
 
 func GetReimbursments(c *fiber.Ctx) error {
-	cookie := c.Cookies("jwt")
-
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
-	})
-
-	if err != nil {
-		c.Status(fiber.StatusUnauthorized)
-		return c.JSON(fiber.Map{
-			"message": "Unauthenticated User",
-		})
-	}
+	checkCookie(c)
+	token := getTokenFromCookie(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 	var reimbursment []models.Reimbursment
 
@@ -315,24 +275,14 @@ func GetReimbursments(c *fiber.Ctx) error {
 }
 
 func GetHistory(c *fiber.Ctx) error {
-	cookie := c.Cookies("jwt")
-
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
-	})
-
-	if err != nil {
-		c.Status(fiber.StatusUnauthorized)
-		return c.JSON(fiber.Map{
-			"message": "Unauthenticated User",
-		})
-	}
+	checkCookie(c)
+	token := getTokenFromCookie(c)
 
 	cols := []map[string]interface{}{}
 	claims := token.Claims.(*jwt.StandardClaims)
 	if claims != nil {
 		fmt.Printf(claims.Issuer)
-		err = database.DB.Raw("SELECT request_id, user_id, title, description, amount, approved_status, date_approved, approved_by,concat(submitter.last_name ,', ', submitter.first_name ) as submitter , concat(approver.last_name,', ',approver.first_name) as approver FROM public.reimbursments as reimbursment INNER JOIN users as approver ON approver.id = reimbursment.approved_by INNER JOIN users as submitter ON submitter.id = reimbursment.user_id where reimbursment.user_id = " + claims.Issuer).Find(&cols).Error
+		err := database.DB.Raw("SELECT request_id, user_id, title, description, amount, approved_status, date_approved, approved_by,concat(submitter.last_name ,', ', submitter.first_name ) as submitter , concat(approver.last_name,', ',approver.first_name) as approver FROM public.reimbursments as reimbursment INNER JOIN users as approver ON approver.id = reimbursment.approved_by INNER JOIN users as submitter ON submitter.id = reimbursment.user_id where reimbursment.user_id = " + claims.Issuer).Find(&cols).Error
 		if err != nil {
 			fmt.Print(err)
 		}
@@ -343,23 +293,13 @@ func GetHistory(c *fiber.Ctx) error {
 }
 
 func GetAllOpenReimbursments(c *fiber.Ctx) error {
-	cookie := c.Cookies("jwt")
-
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
-	})
-
-	if err != nil {
-		c.Status(fiber.StatusUnauthorized)
-		return c.JSON(fiber.Map{
-			"message": "Unauthenticated User",
-		})
-	}
+	checkCookie(c)
+	token := getTokenFromCookie(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 	cols := []map[string]interface{}{}
 
 	if claims != nil {
-		err = database.DB.Raw(" SELECT request_id, user_id, title, description, amount,concat(submitter.last_name ,', ', submitter.first_name ) as submitter FROM public.reimbursments as reimbursment INNER JOIN users as submitter ON submitter.id = reimbursment.user_id where approved_status = ''").Find(&cols).Error
+		err := database.DB.Raw(" SELECT request_id, user_id, title, description, amount,concat(submitter.last_name ,', ', submitter.first_name ) as submitter FROM public.reimbursments as reimbursment INNER JOIN users as submitter ON submitter.id = reimbursment.user_id where approved_status = ''").Find(&cols).Error
 		if err != nil {
 			return c.JSON(err)
 		}
@@ -368,19 +308,8 @@ func GetAllOpenReimbursments(c *fiber.Ctx) error {
 }
 
 func ApproveOrDeny(c *fiber.Ctx) error {
-
-	cookie := c.Cookies("jwt")
-
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
-	})
-
-	if err != nil {
-		c.Status(fiber.StatusUnauthorized)
-		return c.JSON(fiber.Map{
-			"message": "Unauthenticated User",
-		})
-	}
+	checkCookie(c)
+	token := getTokenFromCookie(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 	user := models.User{
 		UserType: "",
@@ -442,9 +371,24 @@ func ApproveOrDeny(c *fiber.Ctx) error {
 
 }
 func GetAllHistory(c *fiber.Ctx) error {
+	checkCookie(c)
+	token := getTokenFromCookie(c)
+	claims := token.Claims.(*jwt.StandardClaims)
+	cols := []map[string]interface{}{}
+
+	if claims != nil {
+		err := database.DB.Raw("SELECT request_id, user_id, title, description, amount, approved_status, date_approved,approved_by,concat(submitter.last_name ,', ', submitter.first_name ) as submitter, concat(approver.last_name,', ',approver.first_name) as approver FROM public.reimbursments as reimbursment INNER JOIN users as approver ON approver.id = reimbursment.approved_by INNER JOIN users as submitter ON submitter.id = reimbursment.user_id").Find(&cols).Error
+		if err != nil {
+			return c.JSON(err)
+		}
+	}
+	return c.JSON(&cols)
+}
+
+func checkCookie(c *fiber.Ctx) error {
 	cookie := c.Cookies("jwt")
 
-	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+	_, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
 
@@ -454,14 +398,16 @@ func GetAllHistory(c *fiber.Ctx) error {
 			"message": "Unauthenticated User",
 		})
 	}
-	claims := token.Claims.(*jwt.StandardClaims)
-	cols := []map[string]interface{}{}
 
-	if claims != nil {
-		err = database.DB.Raw("SELECT request_id, user_id, title, description, amount, approved_status, date_approved,approved_by,concat(submitter.last_name ,', ', submitter.first_name ) as submitter, concat(approver.last_name,', ',approver.first_name) as approver FROM public.reimbursments as reimbursment INNER JOIN users as approver ON approver.id = reimbursment.approved_by INNER JOIN users as submitter ON submitter.id = reimbursment.user_id").Find(&cols).Error
-		if err != nil {
-			return c.JSON(err)
-		}
-	}
-	return c.JSON(&cols)
+	return nil
+}
+
+func getTokenFromCookie(c *fiber.Ctx) *jwt.Token {
+	cookie := c.Cookies("jwt")
+
+	token, _ := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secretKey), nil
+	})
+
+	return token
 }
