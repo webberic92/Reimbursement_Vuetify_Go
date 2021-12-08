@@ -177,7 +177,7 @@ func Login(c *fiber.Ctx) error {
 }
 
 func GetUserById(c *fiber.Ctx) error {
-	checkCookie(c)
+	checkCookieGetToken(c)
 	var user models.User
 	id := string(c.Params("id"))
 	fmt.Print((id))
@@ -196,8 +196,7 @@ func GetUserById(c *fiber.Ctx) error {
 }
 func User(c *fiber.Ctx) error {
 
-	checkCookie(c)
-	token := getTokenFromCookie(c)
+	token, _ := checkCookieGetToken(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 	var user models.User
 
@@ -233,8 +232,7 @@ func Logout(c *fiber.Ctx) error {
 
 func CreateReimbursment(c *fiber.Ctx) error {
 
-	checkCookie(c)
-	token := getTokenFromCookie(c)
+	token, _ := checkCookieGetToken(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 
 	var data map[string]string
@@ -264,8 +262,7 @@ func CreateReimbursment(c *fiber.Ctx) error {
 }
 
 func GetReimbursments(c *fiber.Ctx) error {
-	checkCookie(c)
-	token := getTokenFromCookie(c)
+	token, _ := checkCookieGetToken(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 	var reimbursment []models.Reimbursment
 
@@ -275,8 +272,7 @@ func GetReimbursments(c *fiber.Ctx) error {
 }
 
 func GetHistory(c *fiber.Ctx) error {
-	checkCookie(c)
-	token := getTokenFromCookie(c)
+	token, _ := checkCookieGetToken(c)
 
 	cols := []map[string]interface{}{}
 	claims := token.Claims.(*jwt.StandardClaims)
@@ -293,8 +289,7 @@ func GetHistory(c *fiber.Ctx) error {
 }
 
 func GetAllOpenReimbursments(c *fiber.Ctx) error {
-	checkCookie(c)
-	token := getTokenFromCookie(c)
+	token, _ := checkCookieGetToken(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 	cols := []map[string]interface{}{}
 
@@ -308,8 +303,7 @@ func GetAllOpenReimbursments(c *fiber.Ctx) error {
 }
 
 func ApproveOrDeny(c *fiber.Ctx) error {
-	checkCookie(c)
-	token := getTokenFromCookie(c)
+	token, _ := checkCookieGetToken(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 	user := models.User{
 		UserType: "",
@@ -371,8 +365,7 @@ func ApproveOrDeny(c *fiber.Ctx) error {
 
 }
 func GetAllHistory(c *fiber.Ctx) error {
-	checkCookie(c)
-	token := getTokenFromCookie(c)
+	token, _ := checkCookieGetToken(c)
 	claims := token.Claims.(*jwt.StandardClaims)
 	cols := []map[string]interface{}{}
 
@@ -385,29 +378,19 @@ func GetAllHistory(c *fiber.Ctx) error {
 	return c.JSON(&cols)
 }
 
-func checkCookie(c *fiber.Ctx) error {
+func checkCookieGetToken(c *fiber.Ctx) (*jwt.Token, error) {
 	cookie := c.Cookies("jwt")
 
-	_, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
 
 	if err != nil {
 		c.Status(fiber.StatusUnauthorized)
-		return c.JSON(fiber.Map{
+		return nil, c.JSON(fiber.Map{
 			"message": "Unauthenticated User",
 		})
 	}
 
-	return nil
-}
-
-func getTokenFromCookie(c *fiber.Ctx) *jwt.Token {
-	cookie := c.Cookies("jwt")
-
-	token, _ := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secretKey), nil
-	})
-
-	return token
+	return token, nil
 }
